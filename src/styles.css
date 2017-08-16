@@ -1,1 +1,22 @@
 /* You can add global styles to this file, and also import other style files */
+*{
+  margin: 0 0;
+  padding: 0 0;
+}
+body{
+  height:1080px;
+  width:1920px;
+  background: url("assets/img/大屏幕背景图-测试-布局.png");
+}
+
+
+/*detail图的css*/
+.surplus-deficit-area {
+  fill: black;
+  opacity: 0.1;
+}
+
+.surplus-deficit-line {
+  fill: none;
+  stroke: black;
+}

@@ -1,0 +1,10 @@
+
+.surplus-deficit-area {
+  fill: black;
+  opacity: 0.1;
+}
+
+.surplus-deficit-line {
+  fill: none;
+  stroke: black;
+}

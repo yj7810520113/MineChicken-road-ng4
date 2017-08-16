@@ -1,0 +1,18 @@
+.map{
+  position: absolute;
+  top:125px;
+  left:525px;
+  width: 850px;
+  height: 600px;
+}
+.detailTimeSeries{
+  position: absolute;
+  top:775px;
+  left:525px;
+  width:850px;
+  height:200px;
+}
+
+
+
+
