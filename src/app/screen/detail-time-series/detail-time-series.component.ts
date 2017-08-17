@@ -1,4 +1,10 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
+import {FileReaderService} from "../../service/file-reader.service";
+import {Observable} from 'rxjs/Observable';
+import 'rxjs/add/observable/interval';
+import 'rxjs/add/observable/merge';
+import {SharedVariableService} from "../../service/shared-variable.service";
+
 
 @Component({
   selector: 'app-detail-time-series',
@@ -37,7 +43,7 @@ export class DetailTimeSeriesComponent implements OnInit {
   private currentCursor = 1458432000000;
   private dataSpan;
 
-  constructor() {
+  constructor(private fileReader: FileReaderService,private sharedVariable:SharedVariableService) {
   }
 
   ngOnInit() {
@@ -94,32 +100,53 @@ export class DetailTimeSeriesComponent implements OnInit {
     this.defs_deficitMask = this.defs.append('mask').attr('id', 'deficitMask').append('path').attr('fill', 'white').attr('opacity', 1);
 
 
+    this.fileReader.readFileToJson('/assets/file/areaData_2min.csv')
+    // this.fileReader.readFileToJson('/assets/file/data_offset3.3.csv')
+      .map((d) => {
+        return this.parseAreaDatas(d)
+      })
+      .subscribe(
+        (x) => d3.interval(() => {
+            this.dataSpan = x;
+            this.intervalTimeLine(this)
+          }, this.intervalTimer
+        )
+      );
+
+
+    // Observable.merge(this.fileReader.readFileToJson('/assets/file/areaData_2min.csv'),
+    //   this.fileReader.readFileToJson('/assets/file/data_offset3.3.csv'))
+    //   .subscribe(x => console.log(x))
+
     //=============================================================
     //  测试数据
-    d3.queue()
-      .defer(d3.csv, "../../../assets/file/areaData_2min.csv", this.parseAreaDatas)
-      //        .defer(d3.csv, "budget-deficit-gdp.csv", parseBudgetDeficit)
-      //        .defer(d3.csv, "governments.csv", parseGovernments)
-      .await((error, data) => {
-        console.log(data);
-        console.log(this);
-        this.dataSpan = data;
-        let interval = d3.interval(()=>this.intervalTimeLine(this), this.intervalTimer);
-//            interval.
+//     d3.queue()
+//       .defer(d3.csv, "../../../assets/file/areaData_2min.csv", this.parseAreaDatas)
+//       //        .defer(d3.csv, "budget-deficit-gdp.csv", parseBudgetDeficit)
+//       //        .defer(d3.csv, "governments.csv", parseGovernments)
+//       .await((error, data) => {
+//         console.log(data);
+//         console.log(this);
+//         this.dataSpan = data;
+//         let interval = d3.interval(() => this.intervalTimeLine(this), this.intervalTimer);
+// //            interval.
+//
+//       });
 
-      });
   }
 
   //timeline动画
   intervalTimeLine(that): any {
-    // console.log(that.y(0.2));
-    // console.log(this);
-    // console.log(this);
-    // console.log('111');
-    // console.log(that.dataSpan);
+
     that.currentCursor += 1000 * 60 * 2;
-    console.log(new Date(that.currentCursor));
+    //传递当前时间到Subject
+    this.sharedVariable.setTimeNow(this.currentCursor);
+
+
+
+    // console.log(new Date(that.currentCursor));
     let data = that.dataSpan;
+    // console.log(data);
     that.x.domain([that.currentCursor - 1000 * 60 * 60 * 6, that.currentCursor + 1000 * 60 * 60 * 6]);
     that.y.domain([0, 0.7]);
     that.area.y0(that.y(0));
@@ -131,7 +158,7 @@ export class DetailTimeSeriesComponent implements OnInit {
         areaColor: that.areaLinearGradient(x[0].aver_speed_offset),
         startDate: x[0].daydatetime,
         endDate: x[1].daydatetime,
-        aver_speed_offset:x[0].aver_speed_offset,
+        aver_speed_offset: x[0].aver_speed_offset,
       }
     });
 //            修改mask
@@ -141,8 +168,8 @@ export class DetailTimeSeriesComponent implements OnInit {
 
 //移除元素
     that.aver_speed_offsets.selectAll("rect")
-      // .data([])
-      // .exit()
+    // .data([])
+    // .exit()
       .remove();
     that.aver_speed_offsets.selectAll("rect")
       .data(nowSpanInterval)
@@ -150,24 +177,26 @@ export class DetailTimeSeriesComponent implements OnInit {
       .attr("x", function (d) {
         return that.x(d.startDate);
       })
-      .attr("y",(d)=>that.y(d.aver_speed_offset))
+      .attr("y", (d) => that.y(d.aver_speed_offset))
       .attr("width", function (d, i) {
         return that.x(d.endDate) - that.x(d.startDate) + 0.2;
       })
-      .attr("height",(d)=>{return that.height-that.y(d.aver_speed_offset)})
+      .attr("height", (d) => {
+        return that.height - that.y(d.aver_speed_offset)
+      })
       .attr("fill", function (d) {
 //                    console.log(d.areaColor)
         return d.areaColor;
       })
-      // .attr("mask", "url(#deficitMask)")
-      // .on("mouseover", function (d) {
-      //   // showLabel(d);
-      // })
-      // .on("mouseout", function () {
-      //   // should think of a better way of doing that
-      //   // ideally should be showing/hiding not appending/removing
-      //   d3.select(".annotation-group").remove();
-      // })
+    // .attr("mask", "url(#deficitMask)")
+    // .on("mouseover", function (d) {
+    //   // showLabel(d);
+    // })
+    // .on("mouseout", function () {
+    //   // should think of a better way of doing that
+    //   // ideally should be showing/hiding not appending/removing
+    //   d3.select(".annotation-group").remove();
+    // })
     that.gXaxis.call(that.xAxis);
 //
 //
@@ -181,13 +210,19 @@ export class DetailTimeSeriesComponent implements OnInit {
   parseAreaDatas(d): any {
     // console.log(d);
     // console.log(that);
-    let parseDate = d3.timeParse('%Y-%m-%d %H:%M:%S');
+    const parseDate = d3.timeParse('%Y-%m-%d %H:%M:%S');
+    let result = [];
+    d.forEach((d1, i1) => {
+      // console.log(d1.aver_speed_offset);
+      result.push({
+        daydatetime: parseDate(d1['daydatetime'], 'Y-m-d H:M:S'),
+        aver_speed_offset: parseFloat(d1['aver_speed_offset']),
+      })
+    })
 
+    // console.log(result);
 //        console.log(d3.timeFormat('%Y-%m-%d %H-%M-%S').format(d.daydatetime));
-    return {
-      daydatetime: parseDate(d.daydatetime, 'Y-m-d H:M:S'),
-      aver_speed_offset: parseFloat(d.aver_speed_offset),
-    }
+    return result;
   }
 
   areaLinearGradient(x): string {

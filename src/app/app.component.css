@@ -12,6 +12,13 @@
   width:850px;
   height:200px;
 }
+.compareOffset{
+  postion:absolute;
+  left:50px;
+  top:590px;
+  height: 450px;
+  width:450px;
+}
 
 
 

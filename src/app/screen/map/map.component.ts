@@ -1,5 +1,6 @@
 import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {D3, D3Service} from "d3-ng2-service";
+import {FileReaderService} from "../../service/file-reader.service";
 
 @Component({
   selector: 'app-map',
@@ -10,9 +11,12 @@ export class MapComponent implements OnInit {
   private d3: D3; // <-- Define the private member which will hold the d3 reference
   @ViewChild('svg') private svgElement;
 
-  constructor(element: ElementRef, d3Service: D3Service) {
+  constructor(element: ElementRef, d3Service: D3Service, fileReader: FileReaderService) {
     this.d3 = d3Service.getD3(); // <-- obtain the d3 object from the D3 Service
     // this.parentNativeElement = element.nativeElement;
+    fileReader.readFileToJson('/assets/file/gy_contest_link_info.txt').subscribe((x => console.log(x)
+  ))
+    ;
   }
 
   // private readSingleFile(e):String {
