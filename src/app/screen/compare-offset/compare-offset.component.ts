@@ -1,8 +1,10 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {FileReaderService} from "../../service/file-reader.service";
 import {Observable} from 'rxjs/Observable';
 import 'rxjs/add/observable/interval';
 import 'rxjs/add/observable/merge';
+import 'rxjs/add/operator/filter';
+
 import {SharedVariableService} from "../../service/shared-variable.service";
 
 @Component({
@@ -11,7 +13,13 @@ import {SharedVariableService} from "../../service/shared-variable.service";
   styleUrls: ['./compare-offset.component.css']
 })
 export class CompareOffsetComponent implements OnInit {
+  private selectedDate=['2016-03-01','2016-03-02','2016-03-03','2016-03-04','2016-03-05','2016-03-06','2016-03-07'];
+  private previousDate='2016-02-28';
+  //svg的图形数据
+  private data;
+  @ViewChild('svg') svgElement;
 
+//-----------------------d3相关参数-------------------------------
 //    <!--本地化-->
   private zh = d3.timeFormatLocale({
     decimal: ".",
@@ -35,6 +43,7 @@ export class CompareOffsetComponent implements OnInit {
   private areaHeight = 40;
   private gradientHeight = 10;
   private textLabelParse = d3.timeParse('%Y-%m-%d %H:%M:%S');
+  private dateFormat = d3.timeFormat('%Y-%m-%d');
   private textLabelFormat = d3.timeFormat('%m-%d %w')
   private timeFormat = d3.timeFormat('%H:%M:%S');
   private parseDate = d3.timeParse('%H:%M:%S');
@@ -59,6 +68,7 @@ export class CompareOffsetComponent implements OnInit {
     .tickFormat(d3.timeFormat('%H'))
     .ticks(d3.timeHour.every(1));
 
+  //分别定义三种颜色的比例尺
   private areaNormalYScale = d3.scaleLinear()
     .domain([0, 0.2])
     .range([this.areaHeight, 0]);
@@ -77,22 +87,194 @@ export class CompareOffsetComponent implements OnInit {
   }
 
   ngOnInit() {
-    // Observable.merge(this.fileReader.readFileToJson('/assets/file/渐变颜色1.csv'),
-    //   this.fileReader.readFileToJson('/assets/file/渐变颜色2.csv'),
-    //   this.fileReader.readFileToJson('/assets/file/渐变颜色3.csv'),
-    //   this.fileReader.readFileToJson('/assets/file/渐变颜色4.csv'),
-    //   this.fileReader.readFileToJson('/assets/file/渐变颜色5.csv'),
-    //   this.fileReader.readFileToJson('/assets/file/渐变颜色6.csv'),
-    //   this.fileReader.readFileToJson('/assets/file/渐变颜色7.csv'),
-    // )
-    //   .map((x) => this.parseAreaDatas(x))
-    //   .subscribe((x)=>console.log(x))
-    // this.fileReader.
+    //获取数据
+    this.fileReader.readFileToJson('/assets/file/areaData_2min.csv')
+      .map((d) => {
+        return this.parseAreaDatas(d)
+      })
+      .subscribe((x)=>{
+        this.data=x;
+    });
+    //订阅时间
     this.sharedVariable.getTimeNow().subscribe((x)=>{
-      console.log(x);
+      let nowDate=this.dateFormat(x);
+      // console.log(nowDate);
+      // console.log(this.data);
+      let nowDatas=[];
+      //时间相同什么事都不干
+      if(nowDate==this.previousDate){
+      }
+      //否则过滤数据重新绘图
+      else{
+        this.previousDate=nowDate;
+        for(let i=0;i<this.selectedDate.length;i++) {
+          let nowData = this.data.filter((d) => {
+            if(d.daydatetime.indexOf(this.selectedDate[i])==-1){
+              return false;
+            }
+            else{
+              return true;
+            }
+          });
+          nowDatas.push(nowData);
+        }
+
+      //  利用得到的nowData重新绘图
+        this.renderPlot(nowDatas);
+
+      }
+
+      //只用更改坐标线的平移情况
+      // console.log(nowDatas);
 
     })
 
+  }
+  renderPlot(datas){
+//    每一块area和gradient作为一个g区域
+    let svg=d3.select(this.svgElement.nativeElement);
+
+    // console.log(datas);
+    let gRowN=svg.selectAll('g')
+      .data(datas)
+      .enter()
+      .append('g')
+      .attr('transform',(d,i)=>{return 'translate(0,'+(this.areaHeight+this.gradientHeight+this.gMargin)*i+')'});
+
+    //---------------------------绘制渐变色
+//    添加渐变色
+    let linearGragientN=this.defs.selectAll('linearGradient')
+      .data(datas)
+      .enter()
+      .append('linearGradient')
+      .attr('id',function(d,i){
+        return 'dailyLinearGradient'+i;
+      })
+      .attr('x1','0%')
+      .attr('y1','0%')
+      .attr('x2','100%')
+      .attr('y2','0%')
+      .attr('spreadMethod','pad');
+    linearGragientN.selectAll('stop')
+      .data(function (d) {
+        return d
+      })
+      .enter()
+      .append('stop')
+      .attr("offset", (d,i)=> { return this.gradientMapXScale(i); })
+      .attr("stop-color", d=> { return this.gradientMapColorScale(d.aver_speed_offset); })
+      .attr("stop-opacity", 1);
+
+
+//绘制渐变色填充的矩形
+    let gradientRect=gRowN
+      .append('rect')
+      .attr('x',this.marginLeft)
+      .attr('y',(d,i)=> {
+        return this.areaHeight;
+      })
+      .attr('height',this.gradientHeight)
+      .attr('width',this.plotWidth)
+      .attr('fill',(d,i)=> {
+        return 'url(#dailyLinearGradient'+i+')';
+      });
+
+//    添加时间刻度
+//    只需要在最后一个添加坐标轴就好了
+
+    gRowN.filter((d,i)=>{
+      console.log(i);
+      return i==(datas.length-1)?true:false;
+    }).append('g')
+      .attr('class', 'x axis')
+      .attr('transform', 'translate('+this.marginLeft+',' + ((this.areaHeight+this.gradientHeight))+ ')')
+      .call(this.xAxis);
+
+
+//    -----------------------------------------绘制area图
+//    添加clippath
+    gRowN.append('clipPath')
+      .attr('id','areaClipPath')
+      .append('rect')
+      .attr('x',0)
+      .attr('y',0)
+      .attr('height',this.areaHeight-2)
+      .attr('width',this.plotWidth);
+    let areaPlotN=gRowN.append('g')
+      .attr('transform','translate('+this.marginLeft+','+'0)');
+
+
+//    console.log(areaPlotN.data(function (d) {
+//        return d;
+//    }));
+    console.log(areaPlotN._groups[0]);
+    areaPlotN._groups[0].forEach((d1)=>{
+
+      this.areaYScales.forEach((d2,i2)=> {
+        let area = d3.area()
+          .x(d=>{
+            return this.timeXScale(this.parseDate(d.daydatetime.substr(11,20)));
+          })
+          .y0(()=> {
+            return this.areaYScales[i2](0);
+          })
+          .y1(d=>{
+//                    console.log(d.daydatetime+","+d2.domain()[0]+","+(d.aver_speed_offset-d2.domain()[0]));
+//                    console.log(i2+","+d2(d.aver_speed_offset)+",");
+            return d2(d.aver_speed_offset);
+          });
+        d3.select(d1).append('path')
+          .attr('d',function(){
+            return area(d1.__data__)})
+          .style('fill',this.sequentialIndexScale(i2))
+          .attr('clip-path','url(#areaClipPath)')
+      })
+
+
+    });
+    //    添加日期标志
+    let labelFormat=this.zh.format("%Y年%b %A");
+    areaPlotN.append('g').append('text')
+      .attr('x','-20')
+      .attr('y',20)
+      .text(d=> {
+        return labelFormat((this.textLabelParse(d[0].daydatetime)));
+      })
+//    areaPlotN.append('path')
+//        .attr('d',(d)=>{
+//            areaYScales.forEach(function (yScale) {
+//                let area = d3.area()
+//                    .x(function (d) {
+//                        console.log(x(parseDate(d.daydatetime)));
+//                        return x(parseDate(d.daydatetime))
+//                    })
+//                    .y0(function (d) {
+//                        return 0
+//                    })
+//                    .y1(function (d) {
+//                        return areaYScales[0](d.aver_speed_offset)
+//                    });
+//
+//            })
+//
+//        });
+//    areaYScales.forEach(function (yScale) {
+//        let area=d3.area()
+//            .x(function(d){return x(parseDate(d.daydatetime))})
+//            .y0(function(d){return 0})
+//            .y1(function(d){return yScale(d.aver_speed_offset)});
+//        areaPlotN.append('path')
+//            .attr('d',function(d){return area(d)})
+//            .attr('fill','#ABEDD8')
+//    });
+//    var area_data = d3.area()
+//        .x(function(d) {return x(d.x);	})
+//        .y0(function(d) {return y(d.low);	})
+//        .y1(function(d) {return y(d.high);	});
+//    var area = area_data(area1);
+//    svg.append('path')
+//        .attr('d', area)
+//        .style("fill", "#ABEDD8");
   }
 
   parseAreaDatas(d): any {
