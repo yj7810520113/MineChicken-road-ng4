@@ -10,7 +10,8 @@ import {FileReaderService} from "./service/file-reader.service";
 import {HttpModule} from "@angular/http";
 import {NET_CONFIG, NetConfig} from "./config/net-config";
 import { CompareOffsetComponent } from './screen/compare-offset/compare-offset.component';
-import {SharedVariableService} from "./service/shared-variable.service"; // <-- import statement
+import {SharedVariableService} from "./service/shared-variable.service";
+import {ROAD_PATH_CONFIG, RoadPathConfig} from "./config/road-path-config"; // <-- import statement
 // import 'rx-from-csv';
 
 
@@ -29,7 +30,11 @@ import {SharedVariableService} from "./service/shared-variable.service"; // <-- 
     {
       provide: NET_CONFIG,
       useValue: NetConfig,
-    },],
+    },
+    {
+      provide:ROAD_PATH_CONFIG,
+      useValue:RoadPathConfig,
+    }],
   bootstrap: [AppComponent]
 })
 export class AppModule {

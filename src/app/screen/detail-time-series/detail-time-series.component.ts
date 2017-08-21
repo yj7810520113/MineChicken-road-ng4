@@ -138,7 +138,7 @@ export class DetailTimeSeriesComponent implements OnInit {
   //timeline动画
   intervalTimeLine(that): any {
 
-    that.currentCursor += 1000 * 60 * 2;
+    that.currentCursor += 1000 * 60 * 60*6;
     //传递当前时间到Subject
     this.sharedVariable.setTimeNow(this.currentCursor);
 

@@ -13,7 +13,10 @@ import {SharedVariableService} from "../../service/shared-variable.service";
   styleUrls: ['./compare-offset.component.css']
 })
 export class CompareOffsetComponent implements OnInit {
-  private selectedDate=['2016-03-01','2016-03-02','2016-03-03','2016-03-04','2016-03-05','2016-03-06','2016-03-07'];
+  private selectedDate;
+  private selectedDate1=['2016-03-01','2016-03-02','2016-03-03','2016-03-04','2016-03-05','2016-03-06','2016-03-07'];
+  private selectedDate2=['2016-04-01','2016-04-02','2016-04-03','2016-04-04','2016-04-05','2016-04-06','2016-04-07','2016-04-08','2016-04-09'];
+
   private previousDate='2016-02-28';
   //svg的图形数据
   private data;
@@ -55,7 +58,7 @@ export class CompareOffsetComponent implements OnInit {
     .interpolate(d3.interpolateLab)
     .domain([0, 0.2, 0.55, 0.7, 1])
     .range(['#42bd41', '#42bd41', '#ffb74d', '#ff8a65', '#e84e40']);
-  private defs = d3.select('svg').append('defs');
+  private defs;
 
 //area图比例尺
 
@@ -87,6 +90,12 @@ export class CompareOffsetComponent implements OnInit {
   }
 
   ngOnInit() {
+
+
+
+    let svg=d3.select(this.svgElement.nativeElement);
+    this.defs= svg.append('defs');
+
     //获取数据
     this.fileReader.readFileToJson('/assets/file/areaData_2min.csv')
       .map((d) => {
@@ -97,6 +106,16 @@ export class CompareOffsetComponent implements OnInit {
     });
     //订阅时间
     this.sharedVariable.getTimeNow().subscribe((x)=>{
+      //test
+      if(Math.round(Math.random())==0){
+        this.selectedDate=this.selectedDate1;
+      }
+      else
+        this.selectedDate=this.selectedDate2;
+
+
+
+
       let nowDate=this.dateFormat(x);
       // console.log(nowDate);
       // console.log(this.data);
@@ -133,19 +152,19 @@ export class CompareOffsetComponent implements OnInit {
   renderPlot(datas){
 //    每一块area和gradient作为一个g区域
     let svg=d3.select(this.svgElement.nativeElement);
-
-    // console.log(datas);
-    let gRowN=svg.selectAll('g')
-      .data(datas)
-      .enter()
-      .append('g')
-      .attr('transform',(d,i)=>{return 'translate(0,'+(this.areaHeight+this.gradientHeight+this.gMargin)*i+')'});
+    let gRowN=svg.selectAll('svg>g')
+      .data(datas);
+      let gRowNEnter=gRowN.enter()
+      .append('g').merge(gRowN)
+      .attr('transform',(d,i)=>{return 'translate(0,'+(this.areaHeight+this.gradientHeight+this.gMargin)*i+')'})
+      gRowN.exit().remove();
+      console.log(gRowN);
 
     //---------------------------绘制渐变色
 //    添加渐变色
     let linearGragientN=this.defs.selectAll('linearGradient')
-      .data(datas)
-      .enter()
+      .data(datas);
+      let linearGradientEnter=linearGragientN.enter()
       .append('linearGradient')
       .attr('id',function(d,i){
         return 'dailyLinearGradient'+i;
@@ -154,21 +173,30 @@ export class CompareOffsetComponent implements OnInit {
       .attr('y1','0%')
       .attr('x2','100%')
       .attr('y2','0%')
-      .attr('spreadMethod','pad');
-    linearGragientN.selectAll('stop')
+      .attr('spreadMethod','pad')
+      .merge(linearGragientN);
+      linearGragientN.exit().remove();
+    let linearGradientEnterStop=linearGradientEnter.selectAll('stop')
       .data(function (d) {
         return d
-      })
-      .enter()
+      });
+      linearGradientEnterStop.enter()
       .append('stop')
+        .merge(linearGradientEnterStop)
       .attr("offset", (d,i)=> { return this.gradientMapXScale(i); })
       .attr("stop-color", d=> { return this.gradientMapColorScale(d.aver_speed_offset); })
       .attr("stop-opacity", 1);
+      linearGradientEnterStop.exit().remove();
 
 
 //绘制渐变色填充的矩形
-    let gradientRect=gRowN
-      .append('rect')
+//     console.log(gRowN);
+    // console.log(gRowNEnter);
+    // console.log(gRowNEnter.selectAll());
+    //清除svg>g下面的所有子元素
+    gRowNEnter.selectAll('*').remove();
+     let gradientRectEnter=gRowNEnter
+        .append('rect')
       .attr('x',this.marginLeft)
       .attr('y',(d,i)=> {
         return this.areaHeight;
@@ -177,13 +205,13 @@ export class CompareOffsetComponent implements OnInit {
       .attr('width',this.plotWidth)
       .attr('fill',(d,i)=> {
         return 'url(#dailyLinearGradient'+i+')';
-      });
-
+      })
+      // gradientRect.exit().remove();
 //    添加时间刻度
 //    只需要在最后一个添加坐标轴就好了
 
-    gRowN.filter((d,i)=>{
-      console.log(i);
+    gRowNEnter.filter((d,i)=>{
+      // console.log(i);
       return i==(datas.length-1)?true:false;
     }).append('g')
       .attr('class', 'x axis')
@@ -193,21 +221,21 @@ export class CompareOffsetComponent implements OnInit {
 
 //    -----------------------------------------绘制area图
 //    添加clippath
-    gRowN.append('clipPath')
+    gRowNEnter.append('clipPath')
       .attr('id','areaClipPath')
       .append('rect')
       .attr('x',0)
       .attr('y',0)
       .attr('height',this.areaHeight-2)
       .attr('width',this.plotWidth);
-    let areaPlotN=gRowN.append('g')
+    let areaPlotN=gRowNEnter.append('g')
       .attr('transform','translate('+this.marginLeft+','+'0)');
 
 
 //    console.log(areaPlotN.data(function (d) {
 //        return d;
 //    }));
-    console.log(areaPlotN._groups[0]);
+//     console.log(areaPlotN._groups[0]);
     areaPlotN._groups[0].forEach((d1)=>{
 
       this.areaYScales.forEach((d2,i2)=> {

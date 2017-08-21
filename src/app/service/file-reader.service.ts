@@ -4,13 +4,15 @@ import 'rxjs/add/operator/map';
 import {inject} from "@angular/core/testing";
 import {NET_CONFIG} from "../config/net-config";
 import {INetConfig} from "../config/Inet-config";
+import {ROAD_PATH_CONFIG} from "../config/road-path-config";
+import {IRoadPathConfig} from "../config/Iroad-path-config";
 // import  'rx-from-csv';
 // import {Observable} from "rxjs/Observable";
 
 @Injectable()
 export class FileReaderService {
   //
-  constructor(private http: Http, @Inject(NET_CONFIG) private net_config: INetConfig) {
+  constructor(private http: Http, @Inject(NET_CONFIG) private net_config: INetConfig,@Inject(ROAD_PATH_CONFIG) private road_path_config:IRoadPathConfig) {
   }
 
   //
@@ -21,6 +23,7 @@ export class FileReaderService {
   //     });
   // }
   readFileToJson(path: string): any {
+    console.log(this.road_path_config);
     console.log(this.net_config);
     return this.http.get(this.net_config.CSV_BASE_URL + path)
       .map((x) => {
