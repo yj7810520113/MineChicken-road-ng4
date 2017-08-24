@@ -19,8 +19,17 @@
   /*height: 450px;*/
   min-height:450px;
   width:450px;
-  overflow-y:scroll;
+  overflow-y:auto;
   overflow-x:hidden;
+}
+.simulateTravel{
+  position:absolute;
+  left:1400px;
+  top:130px;
+  width: 470px;
+  height:900px;
+  overflow-y: scroll;
+  overflow-x: hidden;
 }
 
 

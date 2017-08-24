@@ -21,4 +21,4 @@ link_id_5:["8893","6343","5343","5759","4759","7169","6169","3815","2815","7141"
 //    右边的从下到上
 link_id_6:["9863","3769","9044","0241","1241","9141","2969","5525","6525","1741","1518","7869","8869","8425","7425"],
 }
-export let ROAD_PATH_CONFIG=new InjectionToken<IRoadPathConfig>('road.config');
+export let ROAD_PATH_CONFIG=new InjectionToken<IRoadPathConfig>('roadPath.config');

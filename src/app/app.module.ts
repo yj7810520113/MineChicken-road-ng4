@@ -11,7 +11,9 @@ import {HttpModule} from "@angular/http";
 import {NET_CONFIG, NetConfig} from "./config/net-config";
 import { CompareOffsetComponent } from './screen/compare-offset/compare-offset.component';
 import {SharedVariableService} from "./service/shared-variable.service";
-import {ROAD_PATH_CONFIG, RoadPathConfig} from "./config/road-path-config"; // <-- import statement
+import {ROAD_PATH_CONFIG, RoadPathConfig} from "./config/road-path-config";
+import {ROAD_CONFIG, RoadConfig} from "./config/road-config";
+import { SimulateTravelComponent } from './screen/simulate-travel/simulate-travel.component'; // <-- import statement
 // import 'rx-from-csv';
 
 
@@ -20,7 +22,8 @@ import {ROAD_PATH_CONFIG, RoadPathConfig} from "./config/road-path-config"; // <
     AppComponent,
     MapComponent,
     DetailTimeSeriesComponent,
-    CompareOffsetComponent
+    CompareOffsetComponent,
+    SimulateTravelComponent
   ],
   imports: [
     HttpModule,
@@ -34,6 +37,10 @@ import {ROAD_PATH_CONFIG, RoadPathConfig} from "./config/road-path-config"; // <
     {
       provide:ROAD_PATH_CONFIG,
       useValue:RoadPathConfig,
+    },
+    {
+      provide:ROAD_CONFIG,
+      useValue:RoadConfig,
     }],
   bootstrap: [AppComponent]
 })
