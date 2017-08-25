@@ -13,7 +13,8 @@ import { CompareOffsetComponent } from './screen/compare-offset/compare-offset.c
 import {SharedVariableService} from "./service/shared-variable.service";
 import {ROAD_PATH_CONFIG, RoadPathConfig} from "./config/road-path-config";
 import {ROAD_CONFIG, RoadConfig} from "./config/road-config";
-import { SimulateTravelComponent } from './screen/simulate-travel/simulate-travel.component'; // <-- import statement
+import { SimulateTravelComponent } from './screen/simulate-travel/simulate-travel.component';
+import {HttpService} from "./service/http.service"; // <-- import statement
 // import 'rx-from-csv';
 
 
@@ -29,7 +30,7 @@ import { SimulateTravelComponent } from './screen/simulate-travel/simulate-trave
     HttpModule,
     BrowserModule
   ],
-  providers: [D3Service, FileReaderService,SharedVariableService,
+  providers: [D3Service, FileReaderService,SharedVariableService,HttpService,
     {
       provide: NET_CONFIG,
       useValue: NetConfig,
