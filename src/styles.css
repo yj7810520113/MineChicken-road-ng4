@@ -27,30 +27,34 @@ body{
 .link_id_1{
   stroke-width: 2px;
   stroke:#ab47bc;
-  fill:none;
+  fill:transparent;
 }
 .link_id_2{
   stroke-width: 2px;
   stroke:#9575cd;
-  fill:none;
+  fill:transparent;
 }
 .link_id_3{
   stroke-width: 2px;
   stroke:#26a69a;
-  fill:none;
+  fill:transparent;
 }
 .link_id_4{
   stroke-width: 2px;
   stroke:#2baf2b;
-  fill:none;
+  fill:transparent;
 }
 .link_id_5{
   stroke-width: 2px;
   stroke:#d4e157;
-  fill:none;
+  fill:transparent;
 }
 .link_id_6{
   stroke-width: 2px;
   stroke:#ffa726;
-  fill:none;
+  fill:transparent;
+}
+/*link_id_123456在鼠标移动时候的class*/
+.link_id_mousemove{
+  opacity: 0.5;
 }
