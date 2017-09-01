@@ -14,7 +14,9 @@ import {SharedVariableService} from "./service/shared-variable.service";
 import {ROAD_PATH_CONFIG, RoadPathConfig} from "./config/road-path-config";
 import {ROAD_CONFIG, RoadConfig} from "./config/road-config";
 import { SimulateTravelComponent } from './screen/simulate-travel/simulate-travel.component';
-import {HttpService} from "./service/http.service"; // <-- import statement
+import {HttpService} from "./service/http.service";
+import { OverviewTimeSeriesComponent } from './screen/overview-time-series/overview-time-series.component';
+import { CountLinkPieComponent } from './screen/count-link-pie/count-link-pie.component'; // <-- import statement
 // import 'rx-from-csv';
 
 
@@ -24,7 +26,9 @@ import {HttpService} from "./service/http.service"; // <-- import statement
     MapComponent,
     DetailTimeSeriesComponent,
     CompareOffsetComponent,
-    SimulateTravelComponent
+    SimulateTravelComponent,
+    OverviewTimeSeriesComponent,
+    CountLinkPieComponent
   ],
   imports: [
     HttpModule,

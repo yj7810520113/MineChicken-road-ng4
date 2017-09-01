@@ -1,3 +1,4 @@
+//map和simulate之间的传递数据模型
 export class LinkPathData {
   //路径名称：1,2,3,4,5,6
   link_path:number;

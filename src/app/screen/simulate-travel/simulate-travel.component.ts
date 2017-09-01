@@ -228,9 +228,9 @@ export class SimulateTravelComponent implements OnInit {
             return this.lines[(d.values)[0].linkPath-1](d.values)
           }
 
-        })
+          })
         .attr("class", (d)=>'link_id_'+((d.values)[0].linkPath))
-        .on('mouseover',(d,i)=>{
+        .on('mousemove',(d,i)=>{
           // console.log(this);
           var x = d3.mouse(svg.select('path').node())[0];
           // console.log(x);

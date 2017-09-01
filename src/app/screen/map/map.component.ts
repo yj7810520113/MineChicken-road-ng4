@@ -1,6 +1,7 @@
 import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {D3, D3Service} from "d3-ng2-service";
 import {FileReaderService} from "../../service/file-reader.service";
+import {SharedVariableService} from "../../service/shared-variable.service";
 
 @Component({
   selector: 'app-map',
@@ -11,7 +12,7 @@ export class MapComponent implements OnInit {
   private d3: D3; // <-- Define the private member which will hold the d3 reference
   @ViewChild('svg') private svgElement;
 
-  constructor(element: ElementRef, d3Service: D3Service, fileReader: FileReaderService) {
+  constructor(element: ElementRef, d3Service: D3Service, fileReader: FileReaderService,private sharedVariable:SharedVariableService) {
     this.d3 = d3Service.getD3(); // <-- obtain the d3 object from the D3 Service
     // this.parentNativeElement = element.nativeElement;
     fileReader.readFileToJson('/assets/file/gy_contest_link_info.txt').subscribe((x => console.log(x)
@@ -75,16 +76,16 @@ export class MapComponent implements OnInit {
   //路网的颜色映射
   sequentialScale(x): string {
     if (x <= 0) {
-      return '#42bd41';
+      return '#2a9d8f';
     }
     else if (x <= 0.2)
-      return '#42bd41';
+      return '#2a9d8f';
     else if (x <= 0.55)
-      return '#fff176';
+      return '#e9c46a';
     else if (x <= 0.7)
-      return '#ffb74d';
+      return '#f4a261';
     else if (x <= 1) {
-      return '#e84e40';
+      return '#e76f51';
     }
   }
 
@@ -94,14 +95,19 @@ export class MapComponent implements OnInit {
     d3.csv('../../../assets/file/data_offset3.3.csv', (error, data) => {
       let sortByKey = d3.nest()
         .key(function (d) {
-          return d.time;
+          return d.daydatetime;
         })
         .sortKeys(d3.ascending)
         .entries(data);
-      let count = 0
+      let count = 0;
+      console.log(sortByKey)
 
       setInterval(() => {
         $('#dayTime').text((sortByKey[count])['key']);
+
+        //传递参数
+        this.sharedVariable.setLinkSpeedOffsetSubject(sortByKey[count]);
+
         (sortByKey[count])['values'].forEach((d, i) => {
           let link_id = d['link_id'].substring(0, 1) + "_" + d['link_id'].substring(1, 4);
           //            console.log(link_id)
@@ -112,7 +118,7 @@ export class MapComponent implements OnInit {
             .duration(300)
             .ease(d3.easeExpInOut);
           // console.log(this);
-          d3.select('g[id*="' + link_id + '"] >line').transition(t).attr('stroke', this.sequentialScale(d['speed']))
+          d3.select('g[id*="' + link_id + '"] >line').transition(t).attr('stroke', this.sequentialScale(d['speed_offset']))
         })
         //        console.log(count);
         count++;

@@ -1,22 +1,18 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {FileReaderService} from "../../service/file-reader.service";
-import {Observable} from 'rxjs/Observable';
-import 'rxjs/add/observable/interval';
-import 'rxjs/add/observable/merge';
 import {SharedVariableService} from "../../service/shared-variable.service";
 
-
 @Component({
-  selector: 'app-detail-time-series',
-  templateUrl: './detail-time-series.component.html',
-  styleUrls: ['./detail-time-series.component.css']
+  selector: 'app-overview-time-series',
+  templateUrl: './overview-time-series.component.html',
+  styleUrls: ['./overview-time-series.component.css']
 })
-export class DetailTimeSeriesComponent implements OnInit {
+export class OverviewTimeSeriesComponent implements OnInit {
   @ViewChild('svg') svgElement;
   private margin = {top: 100, right: 100, bottom: 100, left: 100};
 
   private width = 960 - this.margin.left - this.margin.right;
-  private height = 300 - this.margin.top - this.margin.bottom;
+  private height = 260 - this.margin.top - this.margin.bottom;
 
 
   private parseYear = d3.timeParse('%Y');
@@ -37,20 +33,18 @@ export class DetailTimeSeriesComponent implements OnInit {
   private yAxis;
   private area;
   private line;
-  // //矩形的g
-  // private aver_speed_offsets;
+  //矩形的g
+  private aver_speed_offsets;
+
+  private deficit_area ;
+
   //面积图上的线条
   private deficit_line;
-  //面积图
-  private deficit_area;
   //x轴
   private gXaxis;
   private defs_deficitMask;
 
-  //--------------------------------------------
-  private intervalTimer = 3000;
-//        时间为2016-03-30
-  private currentCursor = 1458432000000;
+
   private dataSpan;
 
   constructor(private fileReader: FileReaderService,private sharedVariable:SharedVariableService) {
@@ -71,8 +65,8 @@ export class DetailTimeSeriesComponent implements OnInit {
 
     this.xAxis = d3.axisBottom()
       .scale(this.x)
-      .tickFormat(d3.timeFormat('%H:%M'))
-      .ticks(d3.timeHour.every(1));
+      .tickFormat(d3.timeFormat('%m-%d'))
+      .ticks(d3.timeMonday.every(1));
 
     this.yAxis = d3.axisLeft()
       .scale(this.y);
@@ -93,37 +87,39 @@ export class DetailTimeSeriesComponent implements OnInit {
       });
     //            添加clippath
     this.defs.append('clipPath')
-      .attr('id', 'clipAxes')
+      .attr('id', 'clipAxesOverview')
       .append('rect')
       .attr('width', this.width)
       .attr('height', this.height);
-// //        绘制矩形的g
-//     this.aver_speed_offsets = this.svg.append('g')
-//       .attr('class', 'governments')
-//       .attr('clip-path', 'url(#clipAxes)');
+    this.deficit_area = this.svg.append('path')
+
+//        绘制矩形的g
+    this.aver_speed_offsets = this.svg.append('g')
+      .attr('class', 'governments')
+      // .attr('clip-path', 'url(#clipAxesOverview)');
 //        绘制面积图上的线条,
-    this.deficit_area = this.svg.append('path');
-      // .attr('id', 'surplus-deficit-area  ');
     this.deficit_line = this.svg.append('path')
       .attr('class', 'surplus-deficit-line');
     this.gXaxis = this.svg.append('g')
       .attr('class', 'x axis')
       .attr('transform', 'translate(0,' + this.height + ')');
+    // this.defs_deficitMask = this.defs.append('mask').attr('id', 'deficitMask').append('path').attr('fill', 'white').attr('opacity', 1);
 
-    //绘制渐变色
 
-
-    this.fileReader.readFileToJson('/assets/file/areaData_2min.csv')
+    this.fileReader.readFileToJson('/assets/file/data_offset_day.csv')
     // this.fileReader.readFileToJson('/assets/file/data_offset3.3.csv')
       .map((d) => {
         return this.parseAreaDatas(d)
       })
-      .subscribe(
-        (x) => setInterval(() => {
-            this.dataSpan = x;
-            this.intervalTimeLine(this)
-          }, this.intervalTimer
-        )
+      .subscribe(x=>{
+        this.dataSpan=x;
+        this.intervalTimeLine(this);
+      }
+        // (x) => d3.interval(() => {
+        //     this.dataSpan = x;
+        //     this.intervalTimeLine(this)
+        //   }, this.intervalTimer
+        // )
       );
 
 
@@ -151,23 +147,13 @@ export class DetailTimeSeriesComponent implements OnInit {
   //timeline动画
   intervalTimeLine(that): any {
 
-    that.currentCursor += 1000 * 60 * 60*6;
-    //传递当前时间到Subject
-    this.sharedVariable.setTimeNow(this.currentCursor);
-
-
-
     // console.log(new Date(that.currentCursor));
     let data = that.dataSpan;
-    // console.log(data);
-    that.x.domain([that.currentCursor - 1000 * 60 * 60 * 12, that.currentCursor + 1000 * 60 * 60 * 12]);
+    console.log(data);
+    that.x.domain(d3.extent(data,d=>d.daydatetime));
     that.y.domain([0, 0.7]);
     that.area.y0(that.y(0));
-    //根据x.domain从新设置gradientMapXScale的domain
-    that.gradientMapXScale.domain([0,(that.x.domain()[1]-that.x.domain()[0])/(1000*60*2)]);
-    let nowSpan = data.filter((g) => {
-      return g.daydatetime >= that.x.domain()[0] && g.daydatetime <= that.x.domain()[1];
-    })
+    let nowSpan = data.sort((a,b)=>a.daydatetime-b.daydatetime);
     let nowSpanInterval = d3.pairs(nowSpan).map(x => {
       return {
         areaColor: that.areaLinearGradient(x[0].aver_speed_offset),
@@ -177,7 +163,7 @@ export class DetailTimeSeriesComponent implements OnInit {
       }
     });
 //    绘制渐变色
-    let linearGradientEnter=this.svg.select('#barFillLinearDetail')
+    let linearGradientEnter=this.svg.select('#barFillLinearOverView')
       .selectAll('stop')
       .data(nowSpan);
 
@@ -191,65 +177,13 @@ export class DetailTimeSeriesComponent implements OnInit {
     linearGradientEnter.exit().remove();
 
 
-
-// //            修改mask
-//     that.defs_deficitMask.attr("d", () => {
-//       return that.area(data);
-//     });
-
-// //移除元素
-//     that.aver_speed_offsets.selectAll("rect")
-//     // .data([])
-//     // .exit()
-//       .remove();
-//     that.aver_speed_offsets.selectAll("rect")
-//       .data(nowSpanInterval)
-//       .enter().append("rect")
-//       .attr("x", function (d) {
-//         return that.x(d.startDate);
-//       })
-//       .attr("y", (d) => that.y(d.aver_speed_offset))
-//       .attr("width", function (d, i) {
-//         return that.x(d.endDate) - that.x(d.startDate) + 0.2;
-//       })
-//       .attr("height", (d) => {
-//         return that.height - that.y(d.aver_speed_offset)
-//       })
-//       .attr("fill", function (d) {
-// //                    console.log(d.areaColor)
-//         return d.areaColor;
-//       })
-    // .attr("mask", "url(#deficitMask)")
-    // .on("mouseover", function (d) {
-    //   // showLabel(d);
-    // })
-    // .on("mouseout", function () {
-    //   // should think of a better way of doing that
-    //   // ideally should be showing/hiding not appending/removing
-    //   d3.select(".annotation-group").remove();
-    // })
     that.gXaxis.call(that.xAxis);
-
-
-    //变化的动画效果
-//     var t = that.deficit_area.transition().duration(750);
-//     // t.select('#surplus-deficit-area')
-//     //   .attr("d", that.area(nowSpan))
-//     //   .attr('fill','url(#barFillLinearDetail)');
-// //
-// //     t.select('.surplus-deficit-line').call()
-//     t
-//       .attr("d", that.area(nowSpan))
-//       .attr('fill','url(#barFillLinearDetail)');
 //
-//     t=that.deficit_line.transition().duration(750);
-//     t
-//       .attr("d", that.line(nowSpan));
-
-
+//
+// //            console.log(nowSpan);
     that.deficit_area.datum(nowSpan)
       .attr("d", that.area)
-      .attr('fill','url(#barFillLinearDetail)');
+      .attr('fill','url(#barFillLinearOverView)');
     that.deficit_line.datum(nowSpan)
       .attr("d", that.area);
   }
@@ -286,15 +220,6 @@ export class DetailTimeSeriesComponent implements OnInit {
     else if (x <= 1) {
       return 'url(#veryveryBusyLinear)';
     }
-  }
-
-  ready(error, data): any {
-    console.log(data);
-    console.log(this);
-    this.dataSpan = data;
-    let interval = d3.interval(() => this.intervalTimeLine, this.intervalTimer);
-//            interval.
-
   }
 
 }

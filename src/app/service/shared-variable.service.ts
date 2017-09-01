@@ -8,9 +8,13 @@ import "rxjs/add/operator/distinctUntilChanged";
 
 @Injectable()
 export class SharedVariableService {
+  //当前时间
   private timeNowSubject = new Subject();
   private everyHourSpeedOffset=new Subject();
+  //map和simulate之间的数据传递
   private linkPathSubject=new Subject<LinkPathData>();
+  //map和饼图之间的数据传递
+  private linkSpeedOffsetSubject=new Subject();
 
   constructor(private http:Http,private fileReader:FileReaderService) {
   }
@@ -36,6 +40,13 @@ export class SharedVariableService {
   getLinkPathSubjectImmediately():any{
     return this.linkPathSubject.debounceTime(100)
       // .distinctUntilChanged();
+  }
+
+  getLinkSpeedOffsetSubject():any{
+    return this.linkSpeedOffsetSubject;
+  }
+  setLinkSpeedOffsetSubject(linkSpeedOffsetData:any){
+    return this.linkSpeedOffsetSubject.next(linkSpeedOffsetData);
   }
 
 }

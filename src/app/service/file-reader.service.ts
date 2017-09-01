@@ -38,12 +38,15 @@ export class FileReaderService {
     let result = [];
     let headers = lines[0].split(',');
     for (let i = 1; i < lines.length; i++) {
-      var obj = {};
-      var objs = lines[i].split(',');
-      for (let j = 0; j < headers.length; j++) {
-        obj[(headers[j].replace(/\r/,''))] = objs[j];
-      }
-      result.push(obj);
+        var obj = {};
+        var objs = lines[i].split(',');
+        for (let j = 0; j < headers.length; j++) {
+          obj[(headers[j].replace(/\r/, ''))] = objs[j];
+        }
+        if(obj['daydatetime']!=null) {
+          result.push(obj);
+        }
+
     }
     // console.log('111111111111111');
     // console.log(JSON.stringify(result));

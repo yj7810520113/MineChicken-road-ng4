@@ -6,19 +6,22 @@
 body{
   height:1080px;
   width:1920px;
-  background: url("assets/img/大屏幕背景图-测试-布局.png");
+  background: url("assets/img/大屏幕背景图-测试-布局.png") no-repeat;
+  /*background: rgb(7,33,58);*/
+  /*background: rgb(8,13,28);*/
+
 }
 
 
 /*detail图的css*/
 .surplus-deficit-area {
-  fill: black;
   opacity: 0.1;
 }
 
 .surplus-deficit-line {
   fill: none;
-  stroke: black;
+  stroke: red;
+  stroke-width: 0.5px;
 }
 
 
