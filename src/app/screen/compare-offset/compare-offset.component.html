@@ -1,1 +1,19 @@
-<svg #svg   width="450px" style="min-height: 450px;"></svg>
+<div class="display:none;">
+<input  mdInput [mdDatepicker]="picker" placeholder="Choose a date">
+</div>
+
+<md-datepicker #picker></md-datepicker>
+<button md-raised-button (click)="picker.open()">Open</button>
+
+
+
+
+<md-chip-list>
+  <md-chip style="background-color: rgb(7,170,195);margin-left: 0px;" *ngFor="let date of selectedDate">
+    {{date}}
+    <md-icon *ngIf="selectNowTime!=date" mdChipRemove (click)="removeChips(date)">cancel</md-icon>
+  </md-chip>
+</md-chip-list>
+<svg #svg   width="450px" style="margin-top:20px;min-height: 450px;"></svg>
+
+

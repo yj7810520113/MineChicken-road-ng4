@@ -13,11 +13,18 @@ import {SharedVariableService} from "../../service/shared-variable.service";
   styleUrls: ['./compare-offset.component.css']
 })
 export class CompareOffsetComponent implements OnInit {
-  private selectedDate;
+  public selectedDate=[];
   private selectedDate1=['2016-03-01','2016-03-02','2016-03-03','2016-03-04','2016-03-05','2016-03-06','2016-03-07'];
   private selectedDate2=['2016-04-01','2016-04-02','2016-04-03','2016-04-04','2016-04-05','2016-04-06','2016-04-07','2016-04-08','2016-04-09'];
 
   private previousDate='2016-02-28';
+  //2016年3月1号
+  private startSpanTime=1456761600000;
+  //2016年5月31号
+  private endSpanTime=1464624000000;
+  //当前播放/选择的时间
+  public selectNowTime='2016-03-01';
+  private compareCount=7;
   //svg的图形数据
   private data;
   @ViewChild('svg') svgElement;
@@ -41,7 +48,7 @@ export class CompareOffsetComponent implements OnInit {
   private svg = d3.select('svg');
   private marginTop = 30;
   private gMargin = 5;
-  private marginLeft = 30;
+  private marginLeft = 20;
   private plotWidth = 400;
   private areaHeight = 40;
   private gradientHeight = 10;
@@ -106,15 +113,9 @@ export class CompareOffsetComponent implements OnInit {
     });
     //订阅时间
     this.sharedVariable.getTimeNow().subscribe((x)=>{
-      //test
-      if(Math.round(Math.random())==0){
-        this.selectedDate=this.selectedDate1;
-      }
-      else
-        this.selectedDate=this.selectedDate2;
 
-
-
+      //设置在当前时间
+      this.selectNowTime=this.dateFormat(x);
 
       let nowDate=this.dateFormat(x);
       // console.log(nowDate);
@@ -125,6 +126,7 @@ export class CompareOffsetComponent implements OnInit {
       }
       //否则过滤数据重新绘图
       else{
+        this.selectedDate=this.setSelectedDate(x);
         this.previousDate=nowDate;
         for(let i=0;i<this.selectedDate.length;i++) {
           let nowData = this.data.filter((d) => {
@@ -139,6 +141,9 @@ export class CompareOffsetComponent implements OnInit {
         }
 
       //  利用得到的nowData重新绘图
+        nowDatas.sort((a,b)=>{
+          return this.textLabelParse(a[0].daydatetime)-this.textLabelParse(b[0].daydatetime);
+        })
         this.renderPlot(nowDatas);
 
       }
@@ -158,7 +163,6 @@ export class CompareOffsetComponent implements OnInit {
       .append('g').merge(gRowN)
       .attr('transform',(d,i)=>{return 'translate(0,'+(this.areaHeight+this.gradientHeight+this.gMargin)*i+')'})
       gRowN.exit().remove();
-      console.log(gRowN);
 
     //---------------------------绘制渐变色
 //    添加渐变色
@@ -205,7 +209,8 @@ export class CompareOffsetComponent implements OnInit {
       .attr('width',this.plotWidth)
       .attr('fill',(d,i)=> {
         return 'url(#dailyLinearGradient'+i+')';
-      })
+      });
+
       // gradientRect.exit().remove();
 //    添加时间刻度
 //    只需要在最后一个添加坐标轴就好了
@@ -256,12 +261,22 @@ export class CompareOffsetComponent implements OnInit {
             return area(d1.__data__)})
           .style('fill',this.sequentialIndexScale(i2))
           .attr('clip-path','url(#areaClipPath)')
+          .on('mousedown',(d,i)=>{
+            let mouse=d3.mouse(svg.select('path').node());
+            let x=this.timeXScale.invert(mouse[0]);
+            //时间四舍五入
+            let time1=this.timeFormat(Math.round(x/(1000*60*2))*1000*60*2);
+            let d2=d.filter(d1=>{
+              return d1.daydatetime.indexOf(time1)!=-1;
+            })
+            this.sharedVariable.setTimeNow(this.textLabelParse(d2[0].daydatetime).getTime());
+          })
       })
 
 
     });
     //    添加日期标志
-    let labelFormat=this.zh.format("%Y年%b %A");
+    let labelFormat=this.zh.format("%Y年%m月%d日 %A");
     areaPlotN.append('g').append('text')
       .attr('x','-20')
       .attr('y',20)
@@ -305,6 +320,34 @@ export class CompareOffsetComponent implements OnInit {
 //        .style("fill", "#ABEDD8");
   }
 
+
+  //设置selected时间
+  setSelectedDate(timeNow:number):string[]{
+    let selectedDate1=[];
+      selectedDate1.push(this.dateFormat(timeNow));
+    //开始时间是否溢出
+    let startIsInner=(timeNow-3*1000*60*60*24>=this.startSpanTime)?false:true;
+  //  结束时间是否溢出
+    let endIsInner=(timeNow-3*1000*60*60*24<=this.endSpanTime)?false:true;
+    if(startIsInner==true){
+      for(let i=1;i<=this.compareCount;i++){
+        selectedDate1.push(this.dateFormat(timeNow+i*1000*60*60*24));
+      }
+    }
+    else if(endIsInner==true){
+      for(let i=1;i<=this.compareCount;i++){
+        selectedDate1.push(this.dateFormat(timeNow-i*1000*60*60*24));
+      }
+    }
+    else {
+      for(let i=1;i<=this.compareCount/2;i++){
+        selectedDate1.push(this.dateFormat(timeNow+i*1000*60*60*24));
+        selectedDate1.push(this.dateFormat(timeNow-i*1000*60*60*24));
+      }
+    }
+    return selectedDate1;
+  }
+
   parseAreaDatas(d): any {
     //        console.log(d3.timeFormat('%Y-%m-%d %H-%M-%S').format(d.daydatetime));
     let result = [];
@@ -336,13 +379,39 @@ export class CompareOffsetComponent implements OnInit {
 //    }
 
     if (x == 0)
-      return '#42bd41';
+      return '#2a9d8f';
     else if (x == 1)
-      return '#fff176';
+      return '#e9c46a';
     else if (x == 2)
-      return '#ffb74d';
+      return '#f4a261';
     else if (x == 3) {
-      return '#e84e40';
+      return '#e76f51';
     }
+  }
+
+
+//  ---------------------------------ng4-----------------------------------
+  removeChips(date:any){
+    let nowDatas=[];
+    this.selectedDate=this.selectedDate.filter(d=>d!=date)
+    // this.previousDate=nowDate;
+    for(let i=0;i<this.selectedDate.length;i++) {
+      let nowData = this.data.filter((d) => {
+        if(d.daydatetime.indexOf(this.selectedDate[i])==-1){
+          return false;
+        }
+        else{
+          return true;
+        }
+      });
+      nowDatas.push(nowData);
+    }
+
+    //  利用得到的nowData重新绘图
+    nowDatas.sort((a,b)=>{
+      return this.textLabelParse(a[0].daydatetime)-this.textLabelParse(b[0].daydatetime);
+    })
+    this.renderPlot(nowDatas);
+
   }
 }

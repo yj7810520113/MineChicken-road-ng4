@@ -1,10 +1,58 @@
-.countLinkPie{
+/**************当前时间*******************/
+.dayTimeArea{
+  position: absolute;
+  top:70px;
+  left: 50%;
+  width: 980px;
+  margin-left: -490px;
+  /*margin-left:-810px;*/
+
+  color:#07bbc3
+}
+.dayTime{
+  margin: auto auto;
+  width: 400px;
+  line-height: 30px;
+  text-align: center;
+  font-size:25px;
+  border-bottom: 1px #07bbc3 solid;
+}
+
+
+
+/*******************饼图*********************/
+.countLinkPieContainer{
   position: absolute;
   top:125px;
   left:50px;
-  height: 450px;
+  height: 400px;
   width:450px;
 }
+.countLinkPie{
+  position: absolute;
+  height: 400px;
+  width:450px;
+}
+
+/*****************对比图**********************/
+.compareOffsetContainer{
+  position: absolute;
+  left:50px;
+  top:525px;
+  height:505px;
+  width:450px;
+}
+.compareOffset{
+  position:absolute;
+  /*height: 450px;*/
+  height:455px;
+  width:450px;
+  margin-top: 50px;
+  overflow-y:auto;
+  overflow-x:hidden;
+}
+
+
 .map{
   position: absolute;
   top:125px;
@@ -12,40 +60,86 @@
   width: 850px;
   height: 600px;
 }
+/*******************时间线*****************************/
+.timeLineContainer{
+  position:absolute;
+  top:730px;
+  left:530px;
+  height: 300px;
+  width:860px;
+}
 .detailTimeSeries{
-  position: absolute;
-  top:775px;
-  left:525px;
-  width:850px;
-  height:200px;
+  width:100%;
+  height:150px;
 }
 .overViewTimeSeries{
-  position: absolute;
-  top:920px;
-  left:525px;
-  width:850px;
-  height:120px;
+  width:100%;
+  height:100px;
 }
-.compareOffset{
-  position:absolute;
-  left:50px;
-  top:590px;
-  /*height: 450px;*/
-  min-height:450px;
+.controlPannel{
+  margin: auto auto;
+  width:820px;
+  height:50px;
+  padding-left: 25px;
+}
+
+
+
+/*****************模拟出行*********************/
+.simulateTravelContainer{
+  position: absolute;
   width:450px;
-  overflow-y:auto;
-  overflow-x:hidden;
+  height: 905px;
+  top:125px;
+  left:1420px;
+
 }
 .simulateTravel{
   position:absolute;
-  left:1400px;
-  top:130px;
-  width: 470px;
-  height:900px;
+  width: 450px;
+  height:905px;
   overflow-y: scroll;
   overflow-x: hidden;
 }
 
+/*图表范围的css*/
+.plotArea{
+  border:1px solid rgb(7,170,195);
+  background-color: rgba(8,191,199,0.05)
+}
+
+/*图表标题的css*/
+.plotTitleArea{
+  position: absolute;
+  /*top:15px;*/
+  display: inline;
+  width: 300px;
+  height: 30px;
+  margin-top: 13px;
+}
+.triangle-left {
+  float: left;
+  width: 0px;
+  height: 0px;
+  border-top: 15px solid transparent;
+  border-left: 0px solid transparent;
+  border-right: 12px solid rgba(8,187,196,0.8);
+  border-bottom: 15px solid transparent;
+
+}
+.rect-right{
+  float: left;
+  width:170px;
+  height:30px;
+  background: linear-gradient(90deg,rgba(8,187,196,0.8),rgba(8,187,196,0));
+}
+.rect-right .plotTitle{
+  font-size: 21px;
+  font-weight:bold;
+  line-height: 30px;
+  margin-left: 10px;
+  color: white;
+}
 
 
 

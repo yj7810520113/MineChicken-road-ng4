@@ -1,4 +1,51 @@
 /* You can add global styles to this file, and also import other style files */
+/* fallback */
+@import "~@angular/material/prebuilt-themes/indigo-pink.css";
+
+@font-face {
+  font-family: 'Material Icons';
+  font-style: normal;
+  font-weight: 400;
+  src: url('assets/static/MaterialIcons-Regular.woff2') format('woff2');
+}
+
+.material-icons {
+  position: relative;
+  margin: 0 auto;
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 40px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  /*direction: ltr;*/
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}
+/* Rules for sizing the icon. */
+.material-icons.md-18 { font-size: 18px; }
+.material-icons.md-24 { font-size: 24px; }
+.material-icons.md-30 { font-size: 30px; }
+.material-icons.md-36 { font-size: 36px; }
+.material-icons.md-48 { font-size: 48px; }
+
+/* Rules for using icons as black on a light background. */
+.material-icons.md-dark { color: rgba(0, 0, 0, 0.54); }
+.material-icons.md-dark.md-inactive { color: rgba(0, 0, 0, 0.26); }
+
+/* Rules for using icons as white on a dark background. */
+.material-icons.md-light { color: rgba(255, 255, 255, 1); }
+.material-icons.md-light.md-inactive { color: rgba(255, 255, 255, 0.3);}
+
+.material-icons.md-theme-color { color: rgba(8,187,196,1); }
+.material-icons.md-theme-color.md-inactive { color: rgba(8,187,196,0.3);}
+
+
+
 *{
   margin: 0 0;
   padding: 0 0;
@@ -6,11 +53,73 @@
 body{
   height:1080px;
   width:1920px;
-  background: url("assets/img/大屏幕背景图-测试-布局.png") no-repeat;
+  /*background: url("assets/img/大屏幕背景图-测试-布局.png") no-repeat;*/
+  /*background: url("assets/img/大屏幕背景图-测试-布局-1.jpg") no-repeat;*/
+  background: url("assets/img/highway-cars-city-traffic-buildings-black-white.jpg") no-repeat top left scroll;
+  background-size:contain;
+
+  /*background-color: ;*/
+  /*background: url("assets/img/大屏幕背景图-测试-布局-2.jpg") no-repeat;*/
+  font-family:"Microsoft YaHei","simsun","Helvetica Neue"
   /*background: rgb(7,33,58);*/
   /*background: rgb(8,13,28);*/
 
 }
+.plotContainer{
+  height: 100%;
+  width:100%;
+  /*background:rgba(14,15,45,0.9) url("assets/img/大屏幕背景图.png");*/
+  background:rgba(14,15,45,0.95) url("assets/img/大屏幕背景图.png");
+  /*background:rgba(16,26,57,0.95) url("assets/img/大屏幕背景图.png");*/
+}
+/*plot的标题*/
+.triangle-left {
+  float: left;
+  width: 0px;
+  height: 0px;
+  border-top: 15px solid transparent;
+  border-left: 0px solid transparent;
+  border-right: 12px solid rgba(8,187,196,0.8);
+  border-bottom: 15px solid transparent;
+
+}
+.rect-right{
+  float: left;
+  width:170px;
+  height:30px;
+  background: linear-gradient(90deg,rgba(8,187,196,0.8),rgba(8,187,196,0));
+}
+.rect-right .plotTitle{
+  font-size: 21px;
+  font-weight:bold;
+  line-height: 30px;
+  margin-left: 10px;
+  color: white;
+}
+
+
+
+/*currentTime的线*/
+.currentTimeLine{
+  stroke-dasharray: 6 4;
+  stroke:rgba(8,187,196,1);
+  stroke-width: 1px;
+}
+.currentTimeLineLabel{
+  fill:rgba(8,187,196,1);
+  font-size: 12px;
+}
+
+
+
+/*坐标轴*/
+.axis{
+  color:#fff;
+}
+.axis .tick line { stroke: #437988; stroke-width: .5px; }
+.axis .domain { stroke: #437988; stroke-width: .5px; }
+.axis text { fill: #437988;  }
+
 
 
 /*detail图的css*/
@@ -20,10 +129,20 @@ body{
 
 .surplus-deficit-line {
   fill: none;
-  stroke: red;
-  stroke-width: 0.5px;
+  stroke: #459e94;
+  stroke-width: 1px;
 }
 
+/*overview*/
+/*移除改变选择框大小的按钮*/
+g.brush>.handle {
+  display: none;
+}
+
+/*map的css*/
+.unSelectedRoad{
+  opacity:0.2;
+}
 
 
 /*预测出行的path的css*/
@@ -59,5 +178,5 @@ body{
 }
 /*link_id_123456在鼠标移动时候的class*/
 .link_id_mousemove{
-  opacity: 0.5;
+  opacity: 0.2;
 }

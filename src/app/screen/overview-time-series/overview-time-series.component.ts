@@ -1,6 +1,7 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {FileReaderService} from "../../service/file-reader.service";
 import {SharedVariableService} from "../../service/shared-variable.service";
+import {select} from "d3-selection";
 
 @Component({
   selector: 'app-overview-time-series',
@@ -9,22 +10,23 @@ import {SharedVariableService} from "../../service/shared-variable.service";
 })
 export class OverviewTimeSeriesComponent implements OnInit {
   @ViewChild('svg') svgElement;
-  private margin = {top: 100, right: 100, bottom: 100, left: 100};
+  private margin = {top: 20, right: 20, bottom: 20, left: 30};
 
-  private width = 960 - this.margin.left - this.margin.right;
-  private height = 260 - this.margin.top - this.margin.bottom;
+  private width = 860 - this.margin.left - this.margin.right;
+  private height = 100 - this.margin.top - this.margin.bottom;
 
 
   private parseYear = d3.timeParse('%Y');
   private parseDate = d3.timeParse('%Y-%m-%d %H:%M:%S');
   //渐变色比例尺
+  //4*92是因为一天有4个统计的时间段，分别为晚上、早高峰、日平峰、晚高峰，92是因为3月31天4月30听，5月31天
   private gradientMapXScale = d3.scaleLinear()
-    .domain([0, 30 * 24])
+    .domain([0, 4*92])
     .range(["0%", "100%"]);
   private gradientMapColorScale = d3.scaleLinear()
     .interpolate(d3.interpolateLab)
     .domain([0, 0.2, 0.55, 0.7, 1])
-    .range(['#42bd41', '#42bd41', '#ffb74d', '#ff8a65', '#e84e40']);
+    .range(['#2a9d8f', '#2a9d8f', '#e9c46a', '#f4a261', '#e76f51']);
   private svg;
   private defs;
   private x;
@@ -42,22 +44,33 @@ export class OverviewTimeSeriesComponent implements OnInit {
   private deficit_line;
   //x轴
   private gXaxis;
+  private gYaxis;
   private defs_deficitMask;
 
-
+  //画图的数据
   private dataSpan;
+
+  //brush
+  private brush;
+  private gBrush;
+
+  //2016年3月1号
+  private startSpanTime=1456761600000;
+  //2016年5月31号
+  private endSpanTime=1464624000000;
 
   constructor(private fileReader: FileReaderService,private sharedVariable:SharedVariableService) {
   }
 
   ngOnInit() {
-    this.svg = d3.select(this.svgElement.nativeElement);
+    this.svg = d3.select(this.svgElement.nativeElement).append('g').attr('transform','translate('+this.margin.left+","+this.margin.top+")");;
 
 
     this.defs = this.svg.append('defs');
 
 
     this.x = d3.scaleTime()
+      .domain([1456761600000,1464624000000])
       .range([0, this.width]);
 
     this.y = d3.scaleLinear()
@@ -69,7 +82,13 @@ export class OverviewTimeSeriesComponent implements OnInit {
       .ticks(d3.timeMonday.every(1));
 
     this.yAxis = d3.axisLeft()
-      .scale(this.y);
+      .scale(this.y)
+      .tickFormat(d3.format('.0%'))
+      .tickValues([0,0.25,0.5,0.7])
+      .tickPadding(2)
+      .tickSize(2);
+      // .ticks(d3.timeMonday.every(1));
+
     this.area = d3.area()
       .x((d) => {
         return this.x(d.daydatetime);
@@ -103,7 +122,68 @@ export class OverviewTimeSeriesComponent implements OnInit {
     this.gXaxis = this.svg.append('g')
       .attr('class', 'x axis')
       .attr('transform', 'translate(0,' + this.height + ')');
+    this.gYaxis = this.svg.append('g')
+      .attr('class', 'y axis')
+      .attr('transform', 'translate(0,' + 0 + ')');
     // this.defs_deficitMask = this.defs.append('mask').attr('id', 'deficitMask').append('path').attr('fill', 'white').attr('opacity', 1);
+
+    this.brush = d3.brushX()
+      .extent([[0, 0], [this.width, this.height]])
+      .on("start brush", ()=>{
+        if (!d3.event.selection) return; // Ignore empty selections.
+        var extent = d3.event.selection.map(this.x.invert, this.x);
+      })
+      .on("end", ()=>{
+        if (!d3.event.sourceEvent) return; // Only transition after input.
+        if (!d3.event.selection) return; // Ignore empty selections.
+        var d0 = d3.event.selection.map(this.x.invert),
+          d1 = d0.map(Math.round);
+
+        // If empty when rounded, use floor & offset instead.
+        if (d1[0] >= d1[1]) {
+          d1[0] = Math.floor(d0[0]);
+          d1[1] = d1[0] + 1;
+        }
+
+        // d3.select(this).transition().call(brush.move, d1.map(x));
+      });
+
+
+    this.gBrush=this.svg.append("g")
+      .attr("class", "brush")
+      .call(this.brush);
+
+      //-----------------------------------
+      //http://blockbuilder.org/mbostock/6498000
+      //----------------------------------
+      this.gBrush.selectAll(".overlay")
+      .each((d)=>{ d.type = "selection"; }) // Treat overlay interaction as move.
+      .on("mousedown touchstart", ()=>{
+          let mouse=d3.mouse(d3.select(this.svgElement.nativeElement).select('.brush').node());
+
+        let  cx = mouse[0];
+        let selectTime=new Date(this.x.invert(cx)).getTime();
+        if(selectTime+1000*60*60*12>this.endSpanTime){
+          this.gBrush.call(this.brush.move, [this.endSpanTime-1000*60*60*24,this.endSpanTime].map(this.x));
+        }
+        else if(selectTime-1000*60*60*12<this.startSpanTime){
+          this.gBrush.call(this.brush.move, [this.startSpanTime,this.startSpanTime+1000*60*60*24].map(this.x));
+      }
+      else {
+          this.gBrush.call(this.brush.move, [new Date(this.x.invert(cx)).getTime()-1000*60*60*12,new Date(this.x.invert(cx)).getTime()+1000*60*60*12].map(this.x));
+        }
+      //  设置nowTime
+      this.sharedVariable.setTimeNow(Math.round(selectTime/(1000*60*2))*1000*60*2);
+
+      }); // Recenter before brushing.
+    // this.gBrush =this.svg.append("g")
+    //   .attr("class", "brush")
+    //   .call(this.brush);
+    //移动brush的位置
+    this.sharedVariable.getTimeNow()
+      .subscribe(x=>{
+        this.gBrush.call(this.brush.move, [x-1000*60*60*12,x+1000*60*60*12].map(this.x));
+      })
 
 
     this.fileReader.readFileToJson('/assets/file/data_offset_day.csv')
@@ -113,7 +193,7 @@ export class OverviewTimeSeriesComponent implements OnInit {
       })
       .subscribe(x=>{
         this.dataSpan=x;
-        this.intervalTimeLine(this);
+        this.overViewTimeLine(this);
       }
         // (x) => d3.interval(() => {
         //     this.dataSpan = x;
@@ -143,41 +223,44 @@ export class OverviewTimeSeriesComponent implements OnInit {
 //       });
 
   }
+  brushcentered():any{
+    console.log(this)
+    let mouse=d3.mouse(this);
+    console.log(mouse)
+  }
 
-  //timeline动画
-  intervalTimeLine(that): any {
+  overViewTimeLine(that): any {
 
     // console.log(new Date(that.currentCursor));
     let data = that.dataSpan;
-    console.log(data);
     that.x.domain(d3.extent(data,d=>d.daydatetime));
     that.y.domain([0, 0.7]);
     that.area.y0(that.y(0));
     let nowSpan = data.sort((a,b)=>a.daydatetime-b.daydatetime);
-    let nowSpanInterval = d3.pairs(nowSpan).map(x => {
-      return {
-        areaColor: that.areaLinearGradient(x[0].aver_speed_offset),
-        startDate: x[0].daydatetime,
-        endDate: x[1].daydatetime,
-        aver_speed_offset: x[0].aver_speed_offset,
-      }
-    });
+    // let nowSpanInterval = d3.pairs(nowSpan).map(x => {
+    //   return {
+    //     areaColor: that.areaLinearGradient(x[0].aver_speed_offset),
+    //     startDate: x[0].daydatetime,
+    //     endDate: x[1].daydatetime,
+    //     aver_speed_offset: x[0].aver_speed_offset,
+    //   }
+    // });
 //    绘制渐变色
-    let linearGradientEnter=this.svg.select('#barFillLinearOverView')
+    let linearGradientEnter=d3.select(this.svgElement.nativeElement).select('#barFillLinearOverView')
       .selectAll('stop')
       .data(nowSpan);
 
     let linearGradientEnterStop=linearGradientEnter
       .enter()
       .append('stop')
-      .merge(linearGradientEnter)
+      // .merge(linearGradientEnter)
       .attr("offset", (d,i)=> { return this.gradientMapXScale(i); })
       .attr("stop-color", d=> { return this.gradientMapColorScale(d.aver_speed_offset); })
       .attr("stop-opacity", 1);
     linearGradientEnter.exit().remove();
 
 
-    that.gXaxis.call(that.xAxis);
+
 //
 //
 // //            console.log(nowSpan);
@@ -186,6 +269,13 @@ export class OverviewTimeSeriesComponent implements OnInit {
       .attr('fill','url(#barFillLinearOverView)');
     that.deficit_line.datum(nowSpan)
       .attr("d", that.area);
+
+    that.gXaxis.call(that.xAxis);
+    that.gYaxis.call(that.yAxis)
+  }
+
+  brushMoved(){
+
   }
 
 
@@ -220,6 +310,12 @@ export class OverviewTimeSeriesComponent implements OnInit {
     else if (x <= 1) {
       return 'url(#veryveryBusyLinear)';
     }
+  }
+//  --------------------------------angular----------------------------------------
+  private paused=false;
+  pauseClick(){
+    this.paused=!this.paused;
+    this.sharedVariable.setPauser(this.paused);
   }
 
 }

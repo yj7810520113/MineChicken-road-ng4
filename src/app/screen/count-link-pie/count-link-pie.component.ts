@@ -46,7 +46,7 @@ export class CountLinkPieComponent implements OnInit {
       //  分路段渲染图形
         let datas=[];
         for(let roadPathEle in this.roadPathConfig){
-          let xs=x.values.filter(d=>{
+          let xs=x.filter(d=>{
             return this.roadPathConfig[roadPathEle].indexOf(d.link_id)!=-1;
           })
           datas.push(xs);
@@ -71,7 +71,7 @@ export class CountLinkPieComponent implements OnInit {
     let pieSvg = svg.selectAll('path.slice').remove();
     // pieSvg.remove();
     let slice=svg.selectAll('path.slice')
-      .data(pie(this.totalLinksPieData(data.values)),d=>d.value);
+      .data(pie(this.totalLinksPieData(data)),d=>d.value);
     slice.enter().append("path")
       .attr("fill", (d)=> {
         return this.sequentialScale(d.data.key); })
@@ -146,17 +146,16 @@ export class CountLinkPieComponent implements OnInit {
   //路网的颜色映射
   sequentialScale(x): string {
     if (x =='normal') {
-      return '#42bd41';
+      return '#2a9d8f';
     }
     else if (x =='busy')
-      return '#fff176';
+      return '#e9c46a';
     else if (x =='verybusy')
-      return '#ffb74d';
+      return '#f4a261';
     else if (x =='veryverybusy') {
-      return '#e84e40';
+      return '#e76f51';
     }
   }
-
 
 
 }

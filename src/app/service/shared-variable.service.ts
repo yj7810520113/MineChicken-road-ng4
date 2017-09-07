@@ -5,9 +5,23 @@ import {FileReaderService} from "./file-reader.service";
 import {LinkPathData} from "../screen/DataTransModel";
 import "rxjs/add/operator/debounceTime";
 import "rxjs/add/operator/distinctUntilChanged";
+import {Observable} from "rxjs/Observable";
+import "rxjs/add/observable/timer";
+import "rxjs/add/operator/share";
+import "rxjs/add/operator/switchMap";
+import "rxjs/add/observable/never";
 
 @Injectable()
 export class SharedVariableService {
+  //全局定时器（每隔指定时间，发送值）
+  private timerObserver=new Observable();
+  //定时器暂停
+  private  pauser = new Subject();
+  private pausable;
+  //测试的的时间为2016年3月26日
+  private startTime=1458921600000;
+  //测试的duration为500
+  private duration=500;
   //当前时间
   private timeNowSubject = new Subject();
   private everyHourSpeedOffset=new Subject();
@@ -17,17 +31,34 @@ export class SharedVariableService {
   private linkSpeedOffsetSubject=new Subject();
 
   constructor(private http:Http,private fileReader:FileReaderService) {
+    this.timerObserver=Observable.timer(2000,this.duration);
+
+    // https://github.com/ReactiveX/rxjs/issues/1542
+    this.pausable = this.pauser.switchMap(paused => paused ? Observable.never() : this.timerObserver);
+
+    this.pausable.subscribe(x=>{
+      this.setTimeNow(this.startTime);
+      this.startTime+=1000*60*60*1;
+    })
+    this.pauser.next(true);
+
   }
 
+
   setTimeNow(now: number): void {
+    this.startTime=now;
     this.timeNowSubject.next(now);
   }
 
   getTimeNow(): any {
     return this.timeNowSubject;
   }
+
+  setPauser(isPaused:boolean):any{
+    this.pauser.next(isPaused);
+  }
   setEveryHourSpeedOffset():any{
-    // this.everyHourSpeedOffset.next(this.fileReader.readFileToJson('/assets/file/gy_contest_link_info.txt'));
+    // this.everyHourSpeedOffset.next(this.fileReader.readFileToJson('/assets/file/gy_contest_link_info.csv'));
   }
   setLinkPathSubject(linkPathData:LinkPathData):any{
     this.linkPathSubject.next(linkPathData);
@@ -38,7 +69,7 @@ export class SharedVariableService {
       // .distinctUntilChanged();
   }
   getLinkPathSubjectImmediately():any{
-    return this.linkPathSubject.debounceTime(100)
+    return this.linkPathSubject;
       // .distinctUntilChanged();
   }
 

@@ -16,8 +16,11 @@ import {ROAD_CONFIG, RoadConfig} from "./config/road-config";
 import { SimulateTravelComponent } from './screen/simulate-travel/simulate-travel.component';
 import {HttpService} from "./service/http.service";
 import { OverviewTimeSeriesComponent } from './screen/overview-time-series/overview-time-series.component';
-import { CountLinkPieComponent } from './screen/count-link-pie/count-link-pie.component'; // <-- import statement
+import { CountLinkPieComponent } from './screen/count-link-pie/count-link-pie.component';
+import { ControlPannelComponent } from './screen/control-pannel/control-pannel.component'; // <-- import statement
 // import 'rx-from-csv';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {MdChipsModule, MdDatepickerModule, MdIconModule, MdNativeDateModule} from "@angular/material";
 
 
 @NgModule({
@@ -28,11 +31,17 @@ import { CountLinkPieComponent } from './screen/count-link-pie/count-link-pie.co
     CompareOffsetComponent,
     SimulateTravelComponent,
     OverviewTimeSeriesComponent,
-    CountLinkPieComponent
+    CountLinkPieComponent,
+    ControlPannelComponent
   ],
   imports: [
     HttpModule,
-    BrowserModule
+    BrowserModule,
+    BrowserAnimationsModule,
+    MdChipsModule,
+    MdIconModule,
+    MdDatepickerModule,
+    MdNativeDateModule,
   ],
   providers: [D3Service, FileReaderService,SharedVariableService,HttpService,
     {

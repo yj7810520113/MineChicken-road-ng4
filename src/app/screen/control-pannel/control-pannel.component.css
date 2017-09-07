@@ -1,0 +1,19 @@
+.controlPannelItems{
+  float: left;
+  height: 50px;
+  width:50px;
+  margin-left: 10px;
+  margin-right: 10px;
+  text-align: center;
+  cursor: pointer;
+}
+.icon-area{
+  width: 30px;
+  height: 25px;
+  margin: 0 auto;
+}
+.label{
+  margin-top: 28px;
+  font-size: 12px;
+  color: rgb(7,170,195);
+}

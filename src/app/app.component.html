@@ -1,19 +1,55 @@
-<div class="countLinkPie">
-  <app-count-link-pie></app-count-link-pie>
+<div class="dayTimeArea">
+  <div class="dayTime">
+    <div id="dayTime">111</div>
+  </div>
 </div>
 
+<div class="countLinkPieContainer">
+  <div class="plotTitleArea" style="margin-top: -40px;">
+    <div class="triangle-left"></div>
+    <div class="rect-right">
+      <div class="plotTitle">路段预览</div>
+    </div>
+  </div>
+  <div class="countLinkPie plotArea">
+    <app-count-link-pie></app-count-link-pie>
+  </div>
+</div>
+<div class="compareOffsetContainer">
+  <div class="plotTitleArea">
+    <div class="triangle-left"></div>
+    <div class="rect-right">
+      <div class="plotTitle">路段对比</div>
+    </div>
+  </div>
+  <div class="compareOffset plotArea">
+    <app-compare-offset></app-compare-offset>
+  </div>
+</div>
 <div class="map">
   <app-map></app-map>
 </div>
-<!--<div class="detailTimeSeries">-->
-  <!--<app-detail-time-series></app-detail-time-series>-->
-<!--</div>-->
-<!--<div class="overViewTimeSeries">-->
-  <!--<app-overview-time-series></app-overview-time-series>-->
-<!--</div>-->
-<!--<div class="compareOffset">-->
-  <!--<app-compare-offset></app-compare-offset>-->
-<!--</div>-->
-<!--<div class="simulateTravel">-->
-<!--<app-simulate-travel></app-simulate-travel>-->
-<!--</div>-->
+
+<div class="timeLineContainer  plotArea">
+<div class="detailTimeSeries">
+  <app-detail-time-series></app-detail-time-series>
+</div>
+<div class="overViewTimeSeries">
+  <app-overview-time-series></app-overview-time-series>
+</div>
+  <div class="controlPannel">
+    <app-control-pannel></app-control-pannel>
+  </div>
+</div>
+
+<div class="simulateTravelContainer">
+  <div class="plotTitleArea" style="margin-top: -40px;">
+    <div class="triangle-left"></div>
+    <div class="rect-right">
+      <div class="plotTitle">模拟出行</div>
+    </div>
+  </div>
+  <div class="simulateTravel plotArea">
+    <app-simulate-travel></app-simulate-travel>
+  </div>
+</div>

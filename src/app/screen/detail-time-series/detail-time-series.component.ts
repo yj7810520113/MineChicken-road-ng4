@@ -13,14 +13,15 @@ import {SharedVariableService} from "../../service/shared-variable.service";
 })
 export class DetailTimeSeriesComponent implements OnInit {
   @ViewChild('svg') svgElement;
-  private margin = {top: 100, right: 100, bottom: 100, left: 100};
+  private margin = {top: 20, right: 20, bottom: 20, left: 30};
 
-  private width = 960 - this.margin.left - this.margin.right;
-  private height = 300 - this.margin.top - this.margin.bottom;
+  private width = 860 - this.margin.left - this.margin.right;
+  private height = 150 - this.margin.top - this.margin.bottom;
 
 
   private parseYear = d3.timeParse('%Y');
   private parseDate = d3.timeParse('%Y-%m-%d %H:%M:%S');
+  private formatDate=d3.timeFormat('%Y-%m-%d %H:%M:%S');
   //渐变色比例尺
   private gradientMapXScale = d3.scaleLinear()
     .domain([0, 30 * 24])
@@ -28,7 +29,7 @@ export class DetailTimeSeriesComponent implements OnInit {
   private gradientMapColorScale = d3.scaleLinear()
     .interpolate(d3.interpolateLab)
     .domain([0, 0.2, 0.55, 0.7, 1])
-    .range(['#42bd41', '#42bd41', '#ffb74d', '#ff8a65', '#e84e40']);
+    .range(['#2a9d8f', '#2a9d8f', '#e9c46a', '#f4a261', '#e76f51']);
   private svg;
   private defs;
   private x;
@@ -45,20 +46,22 @@ export class DetailTimeSeriesComponent implements OnInit {
   private deficit_area;
   //x轴
   private gXaxis;
+  private gYaxis;
+
   private defs_deficitMask;
 
   //--------------------------------------------
   private intervalTimer = 3000;
 //        时间为2016-03-30
   private currentCursor = 1458432000000;
+
   private dataSpan;
 
   constructor(private fileReader: FileReaderService,private sharedVariable:SharedVariableService) {
   }
 
   ngOnInit() {
-    this.svg = d3.select(this.svgElement.nativeElement);
-
+    this.svg = d3.select(this.svgElement.nativeElement).append('g').attr('transform','translate('+this.margin.left+","+this.margin.top+")");
 
     this.defs = this.svg.append('defs');
 
@@ -109,6 +112,15 @@ export class DetailTimeSeriesComponent implements OnInit {
     this.gXaxis = this.svg.append('g')
       .attr('class', 'x axis')
       .attr('transform', 'translate(0,' + this.height + ')');
+    this.gYaxis = this.svg.append('g')
+      .attr('class', 'y axis')
+      .attr('transform', 'translate(0,' + 0 + ')');
+    this.yAxis = d3.axisLeft()
+      .scale(this.y)
+      .tickFormat(d3.format('.0%'))
+      .tickValues([0,0.25,0.5,0.7])
+      .tickPadding(2)
+      .tickSize(2);
 
     //绘制渐变色
 
@@ -118,13 +130,24 @@ export class DetailTimeSeriesComponent implements OnInit {
       .map((d) => {
         return this.parseAreaDatas(d)
       })
-      .subscribe(
-        (x) => setInterval(() => {
-            this.dataSpan = x;
-            this.intervalTimeLine(this)
-          }, this.intervalTimer
-        )
+      .subscribe((x)=> {
+          this.dataSpan = x;
+        }
+        // (x) => setInterval(() => {
+        //     this.dataSpan = x;
+        //     this.intervalTimeLine(this)
+        //   }, this.intervalTimer
+        // )
       );
+    this.sharedVariable.getTimeNow()
+      .subscribe(x=>{
+        this.currentCursor=x;
+        console.log(this.svg.select('.currentTimeLineLabel').select('text'))
+        this.svg.select('.currentTimeLineLabel').select('text').text(this.formatDate(new Date(x)));
+        if(this.dataSpan) {
+          this.renderTimeLine(this);
+        }
+      })
 
 
     // Observable.merge(this.fileReader.readFileToJson('/assets/file/areaData_2min.csv'),
@@ -149,11 +172,11 @@ export class DetailTimeSeriesComponent implements OnInit {
   }
 
   //timeline动画
-  intervalTimeLine(that): any {
+  renderTimeLine(that): any {
 
-    that.currentCursor += 1000 * 60 * 60*6;
-    //传递当前时间到Subject
-    this.sharedVariable.setTimeNow(this.currentCursor);
+    // that.currentCursor += 1000 * 60 * 60*6;
+    // //传递当前时间到Subject
+    // this.sharedVariable.setTimeNow(this.currentCursor);
 
 
 
@@ -177,7 +200,7 @@ export class DetailTimeSeriesComponent implements OnInit {
       }
     });
 //    绘制渐变色
-    let linearGradientEnter=this.svg.select('#barFillLinearDetail')
+    let linearGradientEnter=d3.select(this.svgElement.nativeElement).select('#barFillLinearDetail')
       .selectAll('stop')
       .data(nowSpan);
 
@@ -191,65 +214,34 @@ export class DetailTimeSeriesComponent implements OnInit {
     linearGradientEnter.exit().remove();
 
 
-
-// //            修改mask
-//     that.defs_deficitMask.attr("d", () => {
-//       return that.area(data);
-//     });
-
-// //移除元素
-//     that.aver_speed_offsets.selectAll("rect")
-//     // .data([])
-//     // .exit()
-//       .remove();
-//     that.aver_speed_offsets.selectAll("rect")
-//       .data(nowSpanInterval)
-//       .enter().append("rect")
-//       .attr("x", function (d) {
-//         return that.x(d.startDate);
-//       })
-//       .attr("y", (d) => that.y(d.aver_speed_offset))
-//       .attr("width", function (d, i) {
-//         return that.x(d.endDate) - that.x(d.startDate) + 0.2;
-//       })
-//       .attr("height", (d) => {
-//         return that.height - that.y(d.aver_speed_offset)
-//       })
-//       .attr("fill", function (d) {
-// //                    console.log(d.areaColor)
-//         return d.areaColor;
-//       })
-    // .attr("mask", "url(#deficitMask)")
-    // .on("mouseover", function (d) {
-    //   // showLabel(d);
-    // })
-    // .on("mouseout", function () {
-    //   // should think of a better way of doing that
-    //   // ideally should be showing/hiding not appending/removing
-    //   d3.select(".annotation-group").remove();
-    // })
     that.gXaxis.call(that.xAxis);
+    that.gYaxis.call(that.yAxis);
 
 
-    //变化的动画效果
-//     var t = that.deficit_area.transition().duration(750);
-//     // t.select('#surplus-deficit-area')
-//     //   .attr("d", that.area(nowSpan))
-//     //   .attr('fill','url(#barFillLinearDetail)');
-// //
-// //     t.select('.surplus-deficit-line').call()
-//     t
-//       .attr("d", that.area(nowSpan))
-//       .attr('fill','url(#barFillLinearDetail)');
-//
-//     t=that.deficit_line.transition().duration(750);
-//     t
-//       .attr("d", that.line(nowSpan));
+
+    //添加当前时间的位置
+    if(that.svg.select('.currentTimeLine')._groups[0][0]==undefined) {
+      that.svg.append('g').attr('class', 'currentTimeLine').append('line')
+        .attr('x1', ((that.x.range()[1] - that.x.range()[0]) / 2))
+        .attr('y1', (that.y.range()[0]))
+        .attr('x2', ((that.x.range()[1] - that.x.range()[0]) / 2))
+        .attr('y2', (that.y.range()[1]));
+      that.svg.append('g').attr('class','currentTimeLineLabel')
+        .append('text')
+        .attr('x',((that.x.range()[1] - that.x.range()[0]) / 2)-50)
+        .attr('y',0);
+    }
 
 
+    let who=that;
     that.deficit_area.datum(nowSpan)
       .attr("d", that.area)
-      .attr('fill','url(#barFillLinearDetail)');
+      .attr('fill','url(#barFillLinearDetail)')
+      .on('mousedown',function(){
+        let clickTime=who.x.invert(d3.mouse(this)[0]);
+        let longTime=new Date(clickTime).getTime();
+        who.sharedVariable.setTimeNow(Math.round(longTime/(1000*60*2))*1000*60*2);
+      });
     that.deficit_line.datum(nowSpan)
       .attr("d", that.area);
   }
@@ -288,13 +280,13 @@ export class DetailTimeSeriesComponent implements OnInit {
     }
   }
 
-  ready(error, data): any {
-    console.log(data);
-    console.log(this);
-    this.dataSpan = data;
-    let interval = d3.interval(() => this.intervalTimeLine, this.intervalTimer);
-//            interval.
-
-  }
+//   ready(error, data): any {
+//     console.log(data);
+//     console.log(this);
+//     this.dataSpan = data;
+//     let interval = d3.interval(() => this.intervalTimeLine, this.intervalTimer);
+// //            interval.
+//
+//   }
 
 }

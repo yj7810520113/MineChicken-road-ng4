@@ -1,0 +1,25 @@
+<!--<div class="controlPannelItems"></div>-->
+<!--<div class="controlPannelItems"></div>-->
+<!--<div class="controlPannelItems"></div>-->
+<!--<div class="controlPannelItems"></div>-->
+<!--<div class="controlPannelItems"></div>-->
+<!--<div class="controlPannelItems">-->
+  <!--<div class="icon-area">-->
+      <!--<i class="material-icons md-30 md-theme-color">pause</i>-->
+  <!--</div>-->
+  <!--<span class="label">暂停</span>-->
+<!--</div>-->
+<!--<div class="controlPannelItems"></div>-->
+<!--<div class="controlPannelItems"></div>-->
+<!--<div class="controlPannelItems"></div>-->
+<!--<div class="controlPannelItems"></div>-->
+<!--<div class="controlPannelItems"></div>-->
+
+<div *ngFor="let data of controlItems" class="controlPannelItems" (click)="clickEvent(data)">
+  <div class="icon-area">
+    <i [ngClass]="{'material-icons':true,'md-30':true,'md-theme-color':true,'md-inactive':!data.isValid}">
+      {{data.iconName}}
+    </i>
+  </div>
+  <span class="label">{{data.value}}</span>
+</div>
