@@ -20,6 +20,10 @@ export class SharedVariableService {
   private pausable;
   //测试的的时间为2016年3月26日
   private startTime=1458921600000;
+  //2016年3月1号
+  private startSpanTime=1456761600000;
+  //2016年5月31号
+  private endSpanTime=1464624000000;
   //测试的duration为500
   private duration=500;
   //当前时间
@@ -29,6 +33,8 @@ export class SharedVariableService {
   private linkPathSubject=new Subject<LinkPathData>();
   //map和饼图之间的数据传递
   private linkSpeedOffsetSubject=new Subject();
+  //饼图像map和模拟出行传递的路径信息
+  private pathSubject=new Subject();
 
   constructor(private http:Http,private fileReader:FileReaderService) {
     this.timerObserver=Observable.timer(2000,this.duration);
@@ -78,6 +84,13 @@ export class SharedVariableService {
   }
   setLinkSpeedOffsetSubject(linkSpeedOffsetData:any){
     return this.linkSpeedOffsetSubject.next(linkSpeedOffsetData);
+  }
+
+  getPathSubject():any{
+    return this.pathSubject;
+  }
+  setPathSubject(path:any){
+    return this.pathSubject.next(path);
   }
 
 }

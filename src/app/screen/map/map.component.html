@@ -1,7 +1,7 @@
 <div>
   <span style="text-align: center;color: rgba(233,30,99,1);font-size: 30px;position:absolute;top: 100px;left:500px;" id="dayTime"></span>
 
-  <svg #svg="" height="600px" width="850px" style="margin-top: -30px">
+  <svg #svg [ngBusy]="busy" height="600px" width="850px" style="margin-top: -30px">
 
     <defs>
       <marker id="arrow" viewBox="0 0 10 10" refX="-20" refY="5" markerWidth="6" markerHeight="6" orient="auto" markerUnits="userSpaceOnUse">

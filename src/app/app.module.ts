@@ -21,6 +21,9 @@ import { ControlPannelComponent } from './screen/control-pannel/control-pannel.c
 // import 'rx-from-csv';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {MdChipsModule, MdDatepickerModule, MdIconModule, MdNativeDateModule} from "@angular/material";
+import {BusyConfig, BusyModule} from "angular2-busy";
+import {InfiniteScrollModule} from "ngx-infinite-scroll";
+import {Ng2PageScrollModule} from "ng2-page-scroll";
 
 
 @NgModule({
@@ -42,6 +45,18 @@ import {MdChipsModule, MdDatepickerModule, MdIconModule, MdNativeDateModule} fro
     MdIconModule,
     MdDatepickerModule,
     MdNativeDateModule,
+    BusyModule,
+    BusyModule.forRoot(
+      new BusyConfig({
+        // message: 'Don\'t panic!',
+        // backdrop: false,
+        // template: '<div>{{message}}</div>',
+        // delay: 200,
+        // minDuration: 200000,
+        // wrapperClass: 'my-class'
+      })
+    ),
+    Ng2PageScrollModule,
   ],
   providers: [D3Service, FileReaderService,SharedVariableService,HttpService,
     {

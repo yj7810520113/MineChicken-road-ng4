@@ -2,7 +2,7 @@
 .dayTimeArea{
   position: absolute;
   top:70px;
-  left: 50%;
+  left: 960px;
   width: 980px;
   margin-left: -490px;
   /*margin-left:-810px;*/
@@ -98,13 +98,12 @@
   position:absolute;
   width: 450px;
   height:905px;
-  overflow-y: scroll;
-  overflow-x: hidden;
+
 }
 
 /*图表范围的css*/
 .plotArea{
-  border:1px solid rgb(7,170,195);
+  border:2px solid rgba(7,170,195,0.1);
   background-color: rgba(8,191,199,0.05)
 }
 

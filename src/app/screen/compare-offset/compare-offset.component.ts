@@ -6,6 +6,8 @@ import 'rxjs/add/observable/merge';
 import 'rxjs/add/operator/filter';
 
 import {SharedVariableService} from "../../service/shared-variable.service";
+import {Subscription} from "rxjs/Subscription";
+import {Http} from "@angular/http";
 
 @Component({
   selector: 'app-compare-offset',
@@ -13,6 +15,12 @@ import {SharedVariableService} from "../../service/shared-variable.service";
   styleUrls: ['./compare-offset.component.css']
 })
 export class CompareOffsetComponent implements OnInit {
+  @ViewChild('svg') svgElement;
+  busy: Subscription;
+
+
+
+  private currentTimeLine;
   public selectedDate=[];
   private selectedDate1=['2016-03-01','2016-03-02','2016-03-03','2016-03-04','2016-03-05','2016-03-06','2016-03-07'];
   private selectedDate2=['2016-04-01','2016-04-02','2016-04-03','2016-04-04','2016-04-05','2016-04-06','2016-04-07','2016-04-08','2016-04-09'];
@@ -27,7 +35,7 @@ export class CompareOffsetComponent implements OnInit {
   private compareCount=7;
   //svg的图形数据
   private data;
-  @ViewChild('svg') svgElement;
+
 
 //-----------------------d3相关参数-------------------------------
 //    <!--本地化-->
@@ -41,14 +49,14 @@ export class CompareOffsetComponent implements OnInit {
     time: "%H:%M:%S",
     periods: ["上午", "下午"],
     days: ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"],
-    shortDays: ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"],
+    shortDays: ["日", "一", "二", "三", "四", "五", "六"],
     months: ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"],
     shortMonths: ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"]
   });
   private svg = d3.select('svg');
   private marginTop = 30;
   private gMargin = 5;
-  private marginLeft = 20;
+  private marginLeft = 35;
   private plotWidth = 400;
   private areaHeight = 40;
   private gradientHeight = 10;
@@ -75,8 +83,8 @@ export class CompareOffsetComponent implements OnInit {
     .domain([this.parseDate('00:00:00'), this.parseDate('23:58:00')]);
   private xAxis = d3.axisBottom()
     .scale(this.timeXScale)
-    .tickFormat(d3.timeFormat('%H'))
-    .ticks(d3.timeHour.every(1));
+    .tickFormat(d3.timeFormat('%H时'))
+    .ticks(d3.timeHour.every(2));
 
   //分别定义三种颜色的比例尺
   private areaNormalYScale = d3.scaleLinear()
@@ -93,11 +101,13 @@ export class CompareOffsetComponent implements OnInit {
     .range([this.areaHeight, 0]);
   private areaYScales = [this.areaNormalYScale, this.areaClearYScale, this.areaBusyYScale, this.areaVeryBusyYScale];
 
-  constructor(private fileReader: FileReaderService,private sharedVariable:SharedVariableService) {
+  constructor(private http:Http,private fileReader: FileReaderService,private sharedVariable:SharedVariableService) {
   }
 
   ngOnInit() {
 
+    this.busy=this.http.get('http://www.mmcode.top:8080/airzj/ajax/tianchi/aqibyday')
+      .subscribe(x=>{})
 
 
     let svg=d3.select(this.svgElement.nativeElement);
@@ -112,7 +122,7 @@ export class CompareOffsetComponent implements OnInit {
         this.data=x;
     });
     //订阅时间
-    this.sharedVariable.getTimeNow().subscribe((x)=>{
+      this.sharedVariable.getTimeNow().subscribe((x)=>{
 
       //设置在当前时间
       this.selectNowTime=this.dateFormat(x);
@@ -146,17 +156,32 @@ export class CompareOffsetComponent implements OnInit {
         })
         this.renderPlot(nowDatas);
 
+
+
+
+
       }
 
-      //只用更改坐标线的平移情况
-      // console.log(nowDatas);
+       // 更新currentTimeLine
+      this.currentTimeLine
+        .attr('x1',this.timeXScale(this.parseDate(this.timeFormat(new Date(x))))+this.marginLeft)
+        .attr('x2',this.timeXScale(this.parseDate(this.timeFormat(new Date(x))))+this.marginLeft)
+        .attr('y2',svg.style('height'));
+
 
     })
 
+
+
   }
   renderPlot(datas){
-//    每一块area和gradient作为一个g区域
     let svg=d3.select(this.svgElement.nativeElement);
+//    根据datas的长度设置svg的height
+    svg.style('height',(this.areaHeight+this.gradientHeight+this.gMargin)*datas.length+4*this.gMargin);
+
+
+
+//    每一块area和gradient作为一个g区域
     let gRowN=svg.selectAll('svg>g')
       .data(datas);
       let gRowNEnter=gRowN.enter()
@@ -215,13 +240,7 @@ export class CompareOffsetComponent implements OnInit {
 //    添加时间刻度
 //    只需要在最后一个添加坐标轴就好了
 
-    gRowNEnter.filter((d,i)=>{
-      // console.log(i);
-      return i==(datas.length-1)?true:false;
-    }).append('g')
-      .attr('class', 'x axis')
-      .attr('transform', 'translate('+this.marginLeft+',' + ((this.areaHeight+this.gradientHeight))+ ')')
-      .call(this.xAxis);
+
 
 
 //    -----------------------------------------绘制area图
@@ -275,49 +294,43 @@ export class CompareOffsetComponent implements OnInit {
 
 
     });
-    //    添加日期标志
-    let labelFormat=this.zh.format("%Y年%m月%d日 %A");
+
+    //    添加y轴日期标志
+    let labelFormat=this.zh.format("%m-%d");
+    let labelFormat1=this.zh.format("%a");
     areaPlotN.append('g').append('text')
-      .attr('x','-20')
+      .attr('x','-35')
       .attr('y',20)
+      .attr('class','compareYText')
       .text(d=> {
         return labelFormat((this.textLabelParse(d[0].daydatetime)));
-      })
-//    areaPlotN.append('path')
-//        .attr('d',(d)=>{
-//            areaYScales.forEach(function (yScale) {
-//                let area = d3.area()
-//                    .x(function (d) {
-//                        console.log(x(parseDate(d.daydatetime)));
-//                        return x(parseDate(d.daydatetime))
-//                    })
-//                    .y0(function (d) {
-//                        return 0
-//                    })
-//                    .y1(function (d) {
-//                        return areaYScales[0](d.aver_speed_offset)
-//                    });
-//
-//            })
-//
-//        });
-//    areaYScales.forEach(function (yScale) {
-//        let area=d3.area()
-//            .x(function(d){return x(parseDate(d.daydatetime))})
-//            .y0(function(d){return 0})
-//            .y1(function(d){return yScale(d.aver_speed_offset)});
-//        areaPlotN.append('path')
-//            .attr('d',function(d){return area(d)})
-//            .attr('fill','#ABEDD8')
-//    });
-//    var area_data = d3.area()
-//        .x(function(d) {return x(d.x);	})
-//        .y0(function(d) {return y(d.low);	})
-//        .y1(function(d) {return y(d.high);	});
-//    var area = area_data(area1);
-//    svg.append('path')
-//        .attr('d', area)
-//        .style("fill", "#ABEDD8");
+      });
+    areaPlotN.append('g').append('text')
+      .attr('x','-25')
+      .attr('y',36)
+      .attr('class','compareYText')
+      .text(d=> {
+        return labelFormat1((this.textLabelParse(d[0].daydatetime)));
+      });
+    //添加坐标轴
+    gRowNEnter.filter((d,i)=>{
+      // console.log(i);
+      return i==(datas.length-1)?true:false;
+    }).append('g')
+      .attr('class', 'x axis')
+      .attr('transform', 'translate('+this.marginLeft+',' + ((this.areaHeight+this.gradientHeight))+ ')')
+      .call(this.xAxis);
+//    添加timeline
+//     初始化currentTimeLine
+//     console.log(svg.select('.currentTimeLine'))
+    if(svg.select('.currentTimeLine')._groups[0][0]==undefined) {
+     this.currentTimeLine=svg.append('line')
+        .attr('class', 'currentTimeLine')
+        .attr('x1', this.marginLeft)
+        .attr('y1', 0)
+        .attr('x2', this.marginLeft)
+        .attr('y2', svg.attr('height'));
+    }
   }
 
 
@@ -328,7 +341,7 @@ export class CompareOffsetComponent implements OnInit {
     //开始时间是否溢出
     let startIsInner=(timeNow-3*1000*60*60*24>=this.startSpanTime)?false:true;
   //  结束时间是否溢出
-    let endIsInner=(timeNow-3*1000*60*60*24<=this.endSpanTime)?false:true;
+    let endIsInner=(timeNow+3*1000*60*60*24<=this.endSpanTime)?false:true;
     if(startIsInner==true){
       for(let i=1;i<=this.compareCount;i++){
         selectedDate1.push(this.dateFormat(timeNow+i*1000*60*60*24));

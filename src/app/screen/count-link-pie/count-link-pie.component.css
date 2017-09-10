@@ -1,3 +1,129 @@
-svg{
-  position:absolute;
+.mainTitle{
+  float: left;
+  width: 100%;
+  height: 25px;
+  background-color: rgba(7,170,195,0.2);
+}
+.mainTitle .subLeftTitle{
+  float: left;
+  width: 249px;
+  height: 25px;
+  line-height: 25px;
+  text-align: center;
+  font-size: 16px;
+  color:rgb(7,170,195);
+}
+.mainTitle .subRightTitle{
+  float: left;
+  width: 199px;
+  height: 25px;
+  line-height: 25px;
+  text-align: center;
+  font-size: 16px;
+  color:rgb(7,170,195);
+}
+.mainTitle .subSplit{
+  float: left;
+  width: 2px;
+  height:19px;
+  margin-top: 3px;
+  margin-bottom: 3px;
+  background-color: rgba(7,170,195,0.3);
+
+}
+.leftContainer{
+  float: left;
+  padding-left: 25px;
+  padding-right: 25px;
+  height: 375px;
+  width:250px;
+  box-sizing:border-box;
+  border-right:2px solid rgba(14,15,45,0.95);
+}
+.leftContainer .textContainer{
+  height: 145px;
+  width: 200px;
+}
+.leftContainer .textContainer .title{
+  float: left;
+  width: 100%;
+  height: 25px;
+  line-height: 25px;
+  font-size: 16px;
+  font-weight: 900;
+  color:rgb(7,170,200);
+
+}
+.leftContainer .textContainer .context{
+  float: left;
+  width: 100%;
+  height: 120px;
+  line-height: 30px;
+  font-size: 16px;
+}
+/*if (x =='normal') {*/
+  /*return '#2a9d8f';*/
+/*}*/
+/*else if (x =='busy')*/
+/*return '#e9c46a';*/
+/*else if (x =='verybusy')*/
+/*return '#f4a261';*/
+/*else if (x =='veryverybusy') {*/
+  /*return '#e76f51';*/
+/*}*/
+.leftContainer .textContainer .context .normal{
+  color:#2a9d8f;
+  height: 30px;
+  width: 100%;
+}
+.leftContainer .textContainer .context .busy{
+  color:#e9c46a;
+  height: 30px;
+  width: 100%;
+}
+.leftContainer .textContainer .context .verybusy{
+  color:#f4a261;
+  height: 30px;
+  width: 100%;
+}
+.leftContainer .textContainer .context .veryverybusy{
+  color:#e76f51;
+  height: 30px;
+  width: 100%;
+}
+
+.leftContainer .plotContainer1{
+  height:200px;
+  width:200px;
+}
+
+
+.rightContainer{
+  float: left;
+  height:375px;
+  width:200px;
+}
+.rightContainer .plotContainer1{
+  height:125px;
+  width: 100px;
+  float: left;
+}
+.rightContainer .plotContainer1 .textContainer{
+  float: left;
+  width: 98px;
+  height: 20px;
+  margin-top: 5px;
+  margin-left: 1px;
+  margin-right: 1px;
+  background-color: rgba(7,170,195,0.1);
+  text-align: center;
+  line-height: 20px;
+  font-size: 13px;
+  color:rgb(7,170,195);
+
+}
+.rightContainer .plotContainer1 .plotContainer2{
+  float: left;
+  height: 100px;
+  width:100px;
 }

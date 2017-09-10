@@ -1,27 +1,86 @@
-<svg #svg height="450px" width="250px">
-  <g transform="translate(125,125)"></g>
-</svg>
+<div class="mainTitle">
+  <div class="subLeftTitle">全路径状态</div>
+  <div class="subSplit"></div>
+  <div class="subRightTitle">分段路径状态</div>
+</div>
 
-<svg #svg1 height="100px" width="100px" transform="translate(250,0)">
-  <g transform="translate(50,50)"></g>
-</svg>
+<div class="leftContainer" >
+  <div class="textContainer">
+    <div class="title">路况播报：</div>
+    <div class="context">
+      <div class="normal">畅通路段有{{' '+roadnormal+' '}}条</div>
+      <div class="busy">拥挤路段有{{' '+roadbusy+' '}}条</div>
+      <div class="verybusy">堵塞路段有{{' '+roadverybusy+' '}}条</div>
+      <div class="veryverybusy">非常堵塞路段有{{' '+roadveryverybusy+' '}}条</div>
+    </div>
+  </div>
+  <div class="plotContainer1">
+    <svg #svg height="200px" width="200px">
+      <g transform="translate(100,100)"></g>
 
-<svg #svg2 height="100px" width="100px" transform="translate(350,0)">
-  <g transform="translate(50,50)"></g>
-</svg>
+    </svg>
+  </div>
+</div>
 
-<svg #svg3 height="100px" width="100px" transform="translate(250,100)">
-  <g transform="translate(50,50)"></g>
-</svg>
+<div class="rightContainer">
+  <div class="plotContainer1">
+    <div class="textContainer">路径1正向</div>
+    <div class="plotContainer2">
+    <svg #svg1 height="100px" width="100px">
+      <g transform="translate(50,50)"></g>
+    </svg>
+    </div>
+  </div>
+  <div class="plotContainer1">
+    <div class="textContainer">路径1逆向</div>
+    <div class="plotContainer2">
+      <svg #svg2 height="100px" width="100px">
+        <g transform="translate(50,50)"></g>
+      </svg>
+    </div>
+  </div>
+  <div class="plotContainer1">
+    <div class="textContainer">路径2正向</div>
+    <div class="plotContainer2">
+      <svg #svg3 height="100px" width="100px">
+        <g transform="translate(50,50)"></g>
+      </svg>
+    </div>
+  </div>
+  <div class="plotContainer1">
+    <div class="textContainer">路径2逆向</div>
+    <div class="plotContainer2">
+      <svg #svg4 height="100px" width="100px">
+        <g transform="translate(50,50)"></g>
+      </svg>
+    </div>
+  </div>
+  <div class="plotContainer1">
+    <div class="textContainer">路径3正向</div>
+    <div class="plotContainer2">
+      <svg #svg5 height="100px" width="100px">
+        <g transform="translate(50,50)"></g>
+      </svg>
+    </div>
+  </div>
+  <div class="plotContainer1">
+    <div class="textContainer">路径3逆向</div>
+    <div class="plotContainer2">
+      <svg #svg6 height="100px" width="100px">
+        <g transform="translate(50,50)"></g>
+      </svg>
+    </div>
+  </div>
+</div>
 
-<svg #svg4 height="100px" width="100px" transform="translate(350,100)">
-  <g transform="translate(50,50)"></g>
-</svg>
 
-<svg #svg5 height="100px" width="100px" transform="translate(250,200)">
-  <g transform="translate(50,50)"></g>
-</svg>
 
-<svg #svg6 height="100px" width="100px" transform="translate(350,200)">
-  <g transform="translate(50,50)"></g>
-</svg>
+
+
+
+
+
+
+
+
+

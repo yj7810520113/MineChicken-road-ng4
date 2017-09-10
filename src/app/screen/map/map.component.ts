@@ -6,6 +6,7 @@ import {HttpService} from "../../service/http.service";
 import {ROAD_PATH_CONFIG} from "../../config/road-path-config";
 import {LinkPathData} from "../DataTransModel";
 import {ROAD_CONFIG} from "../../config/road-config";
+import {Subscription} from "rxjs/Subscription";
 
 @Component({
   selector: 'app-map',
@@ -16,6 +17,8 @@ export class MapComponent implements OnInit {
   private d3: D3; // <-- Define the private member which will hold the d3 reference
   @ViewChild('svg') private svgElement;
   @ViewChild('tooltip1') private tooltip1;
+  busy:Subscription;
+
   private  timeFormat = d3.timeFormat('%Y-%m-%d %H:%M:%S');
   private  dateFormat = d3.timeFormat('%Y-%m-%d');
   private previousDate='1970-01-01';//作为是否需要取数据的标志
@@ -117,7 +120,7 @@ export class MapComponent implements OnInit {
 
 
     //设置路网的宽度
-    this.fileReader.readFileToJson('/assets/file/gy_contest_link_info.csv')
+    this.busy=this.fileReader.readFileToJson('/assets/file/gy_contest_link_info.csv')
       .subscribe(x=>{
           x.forEach(d=>{
             d3Svg.select('#link'+d.link_ID).attr("stroke", "rgba(0, 255, 251, 0.5)");
@@ -137,7 +140,7 @@ export class MapComponent implements OnInit {
           //     console.log(x)
           //     this.roadData=x;
           //   })
-          this.fileReader.readCDNCSVFileToJson('/map/'+this.previousDate)
+          this.busy=this.fileReader.readCDNCSVFileToJson('/map/'+this.previousDate)
             .map(x=>this.parseMapDatas(x))
             .subscribe(x=>{
               this.roadData=x;
@@ -181,6 +184,20 @@ export class MapComponent implements OnInit {
         }
         else{
           this.selectedRoad((x['link_ids'])[1]);
+        }
+      })
+
+  //  与饼图的path的交互
+    this.sharedVariable.getPathSubject()
+      .subscribe(x=>{
+        if(x==null){
+          d3Svg.selectAll('line').classed('unSelectedRoad',false);
+        }
+        else {
+          d3Svg.selectAll('line').classed('unSelectedRoad',true);
+          this.roadPathConfig['link_id_' + x].forEach(d => {
+            d3Svg.select('#link'+d).classed('unSelectedRoad',false);
+          })
         }
       })
 

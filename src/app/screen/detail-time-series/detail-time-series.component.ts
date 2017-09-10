@@ -4,6 +4,7 @@ import {Observable} from 'rxjs/Observable';
 import 'rxjs/add/observable/interval';
 import 'rxjs/add/observable/merge';
 import {SharedVariableService} from "../../service/shared-variable.service";
+import {Subscription} from "rxjs/Subscription";
 
 
 @Component({
@@ -13,6 +14,8 @@ import {SharedVariableService} from "../../service/shared-variable.service";
 })
 export class DetailTimeSeriesComponent implements OnInit {
   @ViewChild('svg') svgElement;
+  busy:Subscription;
+
   private margin = {top: 20, right: 20, bottom: 20, left: 30};
 
   private width = 860 - this.margin.left - this.margin.right;
@@ -125,7 +128,7 @@ export class DetailTimeSeriesComponent implements OnInit {
     //绘制渐变色
 
 
-    this.fileReader.readFileToJson('/assets/file/areaData_2min.csv')
+    this.busy=this.fileReader.readFileToJson('/assets/file/areaData_2min.csv')
     // this.fileReader.readFileToJson('/assets/file/data_offset3.3.csv')
       .map((d) => {
         return this.parseAreaDatas(d)
@@ -142,7 +145,6 @@ export class DetailTimeSeriesComponent implements OnInit {
     this.sharedVariable.getTimeNow()
       .subscribe(x=>{
         this.currentCursor=x;
-        console.log(this.svg.select('.currentTimeLineLabel').select('text'))
         this.svg.select('.currentTimeLineLabel').select('text').text(this.formatDate(new Date(x)));
         if(this.dataSpan) {
           this.renderTimeLine(this);

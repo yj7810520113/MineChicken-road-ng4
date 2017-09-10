@@ -1,4 +1,4 @@
-import {Component, Inject, OnInit, ViewChild} from '@angular/core';
+import {Component, ElementRef, Inject, OnInit, ViewChild} from '@angular/core';
 import {ROAD_CONFIG} from "../../config/road-config";
 import {ROAD_PATH_CONFIG} from "../../config/road-path-config";
 import {HttpService} from "../../service/http.service";
@@ -6,6 +6,9 @@ import {log} from "util";
 import {LinkPathData} from "../DataTransModel";
 import {SharedVariableService} from "../../service/shared-variable.service";
 import {FileReaderService} from "../../service/file-reader.service";
+import {Subscription} from "rxjs/Subscription";
+import { DOCUMENT} from '@angular/common';
+import { PageScrollConfig, PageScrollService, PageScrollInstance } from 'ng2-page-scroll';
 @Component({
   selector: 'app-simulate-travel',
   templateUrl: './simulate-travel.component.html',
@@ -13,17 +16,24 @@ import {FileReaderService} from "../../service/file-reader.service";
 })
 export class SimulateTravelComponent implements OnInit {
   @ViewChild('svg') svgElement;
+  @ViewChild('ngScroll') divScroll:ElementRef;
+  busy:Subscription;
+  // busy:Subscription;
+  scrollDistance=0;
+
+
   private svg;
   private linkPathData=new LinkPathData();
   private simulateData=[];
 
   private pathPlot;
 
-  private margin={top:50,left:35,right:20,bottom:50,plotGap:10};
+  private margin={top:10,left:35,right:20,bottom:50,plotGap:10};
   private svgWidth=450;
   private svgHeight=4000;
 
   private parseDate = d3.timeParse('%Y-%m-%d %H:%M:%S');
+  private formateDate=d3.timeFormat('%Y-%m-%d %H:%M:%S');
   private dateFormat = d3.timeFormat('%Y-%m-%d');
   private previousDate='1970-01-01';//作为是否要刷新y轴的标志
   private linkPathsRange=[];
@@ -35,12 +45,23 @@ export class SimulateTravelComponent implements OnInit {
   private gYaxis;
   private lines;//线段生成器
 
+  private currentTimeLine;
 
 
-  constructor(private http:HttpService,private fileReader:FileReaderService,private sharedVariable:SharedVariableService,@Inject(ROAD_CONFIG) private roadConfig,@Inject(ROAD_PATH_CONFIG) private roadPathConfig) { }
+
+  constructor(private http:HttpService,private fileReader:FileReaderService,private sharedVariable:SharedVariableService,@Inject(ROAD_CONFIG) private roadConfig,@Inject(ROAD_PATH_CONFIG) private roadPathConfig,private pageScrollService: PageScrollService, @Inject(DOCUMENT) private document: any) { }
 
   ngOnInit() {
     this.svg=d3.select(this.svgElement.nativeElement).append('g').attr('transform','translate('+this.margin.left+','+this.margin.top+')');
+
+    // let pageScrollInstance: PageScrollInstance = PageScrollInstance.newInstance({document: this.document, scrollTarget: '.headingClass', scrollingViews: [this.divScroll.nativeElement]});
+    // this.pageScrollService.start(pageScrollInstance);
+
+
+
+
+
+
 
     let lengthMap=new Map();
     lengthMap.set('start',0);
@@ -134,6 +155,7 @@ export class SimulateTravelComponent implements OnInit {
 
     this.sharedVariable.getTimeNow()
       .subscribe(z=>{
+
         //如果时间不相等，则刷新plot
         if(this.previousDate!=this.dateFormat(z)){
           this.previousDate=this.dateFormat(z);
@@ -145,16 +167,40 @@ export class SimulateTravelComponent implements OnInit {
           //     this.simulateData=x;
           //     this.renderPlot(this.simulateData);
           //   });
-          this.fileReader.readCDNCSVFileToJson('/predict/'+this.previousDate)
+          this.busy=this.fileReader.readCDNCSVFileToJson('/predict/'+this.previousDate)
             .map(x=>this.parseTravelDatas(x))
             .subscribe(x=>{
               this.simulateData=x;
               this.renderPlot(this.simulateData);
+
+              this.currentTimeLine=this.svg.append('g').attr('transform','translate('+(-this.margin.left+10)+','+'0)').attr('class', 'currentTimeLine').append('line')
+                .attr('x1', 0)
+                //.attr('y1', (that.y.range()[0]))
+                .attr('x2', this.svgWidth+this.margin.left);
+              this.currentTimeLine.attr('y1',this.yScale(new Date(z)))
+                .attr('y2',this.yScale(new Date(z)));
+
+            //  移动=scroll
+              this.scrollDistance=this.yScale(new Date(z))-400;
+              this.divScroll.nativeElement.scrollTop=this.scrollDistance;
             });
         }
         //如果时间相等
         else{
+        //   console.log(z)
+        // console.log(this.currentTimeLine)
+        //   console.log(this.yScale.domain())
+        //   console.log(this.yScale.invert(new Date(z)))
+          this.currentTimeLine.attr('y1',this.yScale(new Date(z)))
+            .attr('y2',this.yScale(new Date(z)));
+
+
+          //  移动=scroll
+          this.scrollDistance=this.yScale(new Date(z))-400;
+          this.divScroll.nativeElement.scrollTop=this.scrollDistance;
         }
+
+
       })
 
   //
@@ -184,6 +230,30 @@ export class SimulateTravelComponent implements OnInit {
           }
         }
     });
+
+  //  监听饼图中的鼠标移动事件
+    this.sharedVariable.getPathSubject()
+      .subscribe(x=>{
+        // if()
+        if(x==null){
+          this.svg.selectAll('g[class^="link_id_"]').classed('link_id_mousemove',false);
+        }
+        else {
+          // let that = this;
+          this.svg.selectAll('g[class^="link_id_"]')
+            .each(function (p, j) {
+              // console.log(x)
+              // console.log(d3.select(this).attr('class'))
+              if (d3.select(this).attr('class') != 'link_id_' + x) {
+                d3.select(this).classed('link_id_mousemove', true);
+              }
+              else {
+                d3.select(this).classed('link_id_mousemove', false);
+              }
+
+            })
+        }
+      })
 
   }
   //渲染图形
@@ -293,6 +363,9 @@ export class SimulateTravelComponent implements OnInit {
 
 
 
+
+
+
     // }
     // else{
     //
@@ -324,6 +397,7 @@ export class SimulateTravelComponent implements OnInit {
     // svgEnter().exit().remove();
 
     //生成path的g和path
+    let that=this;
     let plotEnter=svgEnterg.selectAll('g')
       .data(d=>{return d.values})
       .enter()
@@ -332,7 +406,13 @@ export class SimulateTravelComponent implements OnInit {
           return this.lines[(d.values)[0].linkPath-1](d.values)
         }
       )
-      .attr("class", (d)=>'link_id_'+((d.values)[0].linkPath));
+      .attr("class", (d)=>'link_id_'+((d.values)[0].linkPath))
+      .on('mousedown',()=>{
+        //当鼠标移动到path上面的时候，path是可以点击的状态
+        let mouseY=d3.mouse(this.svg.select('path').node())[1];
+        let timeNow1=this.yScale.invert(mouseY);
+        this.sharedVariable.setTimeNow(Math.round(timeNow1/(1000*60*2))*1000*60*2);
+      });
 ;
   }
 
@@ -479,4 +559,13 @@ export class SimulateTravelComponent implements OnInit {
     selection.classed('link_id_mousemove',false);
   }
 
+
+
+  onScrollDown () {
+    console.log('scrolled down!!')
+  }
+
+  onScrollUp () {
+    console.log('scrolled up!!')
+  }
 }

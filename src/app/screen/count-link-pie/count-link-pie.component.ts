@@ -1,6 +1,7 @@
 import {Component, Inject, OnInit, ViewChild} from '@angular/core';
 import {SharedVariableService} from "../../service/shared-variable.service";
 import {ROAD_PATH_CONFIG} from "../../config/road-path-config";
+import {Subscription} from "rxjs/Subscription";
 
 @Component({
   selector: 'app-count-link-pie',
@@ -17,10 +18,17 @@ export class CountLinkPieComponent implements OnInit {
   @ViewChild('svg6') private svgElement6;
 
 
-  private mainRadius=250/2;
+  //路况播报的的情况
+  roadnormal=0;
+  roadbusy=0;
+  roadverybusy=0;
+  roadveryverybusy=0;
+
+
+  private mainRadius=200/2;
   private mainArc = d3.arc()
     .innerRadius(this.mainRadius - 20)
-    .outerRadius(this.mainRadius - 80);
+    .outerRadius(this.mainRadius - 70);
   private areaRadius=100/2;
   private areaArc=d3.arc()
     .innerRadius(this.areaRadius-10)
@@ -30,17 +38,59 @@ export class CountLinkPieComponent implements OnInit {
 
   ngOnInit() {
     d3.select(this.svgElement.nativeElement).select('g').append('g').attr('class','slices');
-    d3.select(this.svgElement1.nativeElement).select('g').append('g').attr('class','slices1');
-    d3.select(this.svgElement2.nativeElement).select('g').append('g').attr('class','slices2');
-    d3.select(this.svgElement3.nativeElement).select('g').append('g').attr('class','slices3');
-    d3.select(this.svgElement4.nativeElement).select('g').append('g').attr('class','slices4');
-    d3.select(this.svgElement5.nativeElement).select('g').append('g').attr('class','slices5');
-    d3.select(this.svgElement6.nativeElement).select('g').append('g').attr('class','slices6');
+    d3.select(this.svgElement1.nativeElement).select('g')
+      .on('mouseover',()=>{
+      this.shariedVariable.setPathSubject(1)
+       })
+      .on('mouseout',()=>{
+        this.shariedVariable.setPathSubject(null);
+      }).append('g').attr('class','slices1');
+    d3.select(this.svgElement2.nativeElement).select('g')
+      .on('mouseover',()=>{
+        this.shariedVariable.setPathSubject(2)
+      })
+      .on('mouseout',()=>{
+        this.shariedVariable.setPathSubject(null);
+      }).append('g').attr('class','slices2');
+    d3.select(this.svgElement3.nativeElement)
+      .on('mouseover',()=>{
+        this.shariedVariable.setPathSubject(3)
+      })
+      .on('mouseout',()=>{
+        this.shariedVariable.setPathSubject(null);
+      }).select('g').append('g').attr('class','slices3');
+    d3.select(this.svgElement4.nativeElement)
+      .on('mouseover',()=>{
+        this.shariedVariable.setPathSubject(4)
+      })
+      .on('mouseout',()=>{
+        this.shariedVariable.setPathSubject(null);
+      }).select('g').append('g').attr('class','slices4');
+    d3.select(this.svgElement5.nativeElement)
+      .on('mouseover',()=>{
+        this.shariedVariable.setPathSubject(5)
+      })
+      .on('mouseout',()=>{
+        this.shariedVariable.setPathSubject(null);
+      }).select('g').append('g').attr('class','slices5');
+    d3.select(this.svgElement6.nativeElement)
+      .on('mouseover',()=>{
+        this.shariedVariable.setPathSubject(6)
+      })
+      .on('mouseout',()=>{
+        this.shariedVariable.setPathSubject(null);
+      }).select('g').append('g').attr('class','slices6');
 
 
 
     this.shariedVariable.getLinkSpeedOffsetSubject()
       .subscribe(x=>{
+        //设置路径播报中的字
+        let roadDatas=this.totalLinksPieData(x);
+        roadDatas.forEach(d=>{
+          let that=this;
+          eval('that.road'+d.key+'='+d.value);
+        })
         //渲染所有路段的饼图
         this.renderMainPlot(x);
       //  分路段渲染图形
@@ -61,6 +111,7 @@ export class CountLinkPieComponent implements OnInit {
 
     // console./log(data)
     // console.log(this.totalLinksPieData(data.values))
+    let datas=this.totalLinksPieData(data);
     let svg=d3.select(eval("this.svgElement.nativeElement")).select('g').select('.slices');
     let pie = d3.pie()
       .value(function(d) { return d.value; })
@@ -71,7 +122,7 @@ export class CountLinkPieComponent implements OnInit {
     let pieSvg = svg.selectAll('path.slice').remove();
     // pieSvg.remove();
     let slice=svg.selectAll('path.slice')
-      .data(pie(this.totalLinksPieData(data)),d=>d.value);
+      .data(pie(datas),d=>d.value);
     slice.enter().append("path")
       .attr("fill", (d)=> {
         return this.sequentialScale(d.data.key); })
@@ -83,11 +134,12 @@ export class CountLinkPieComponent implements OnInit {
   }
 
   //  分路段渲染图形图形
-  renderAreaaPlot(data){
+    renderAreaaPlot(data){
 
     for(let index in data) {
       // console.log("this.svgElement"+(parseInt(index)+1)+".nativeElement")
-      let svg = d3.select(eval("this.svgElement"+(parseInt(index)+1)+".nativeElement")).select('g').select('.slices'+(parseInt(index)+1));
+      let svg = d3.select(eval("this.svgElement"+(parseInt(index)+1)+".nativeElement"))
+        .select('g').select('.slices'+(parseInt(index)+1));
       let pie = d3.pie()
         .value(function (d) {
           return d.value;
@@ -139,6 +191,7 @@ export class CountLinkPieComponent implements OnInit {
     });
     for(let key of pieDataMap.keys()){
       pieData.push({key:key,value:pieDataMap.get(key)})
+
     }
     return pieData;
 

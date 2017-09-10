@@ -1,0 +1,37 @@
+.simulateTravelTitle{
+  height: 50px;
+  width: 100%;
+}
+.simulateTravelTitle .mainTitle{
+  float: left;
+  height: 25px;
+  width: 100%;
+  line-height: 25px;
+  font-size: 16px;
+  text-align: center;
+  color:rgb(7,170,195);
+  background-color: rgba(7,170,195,0.2);
+}
+.simulateTravelTitle .subTitle{
+  float: left;
+  height: 22px;
+  width: 100%;
+  margin-top: 3px;
+
+}
+.simulateTravelTitle .subTitle .linkId{
+  float: left;
+  height: 22px;
+  width: 148px;
+  text-align: center;
+  color:rgb(7,170,200);
+  background-color: rgba(7,170,195,0.3);
+  margin-right: 2px;
+}
+.ngScroll{
+  height: 830px;
+  width: 100%;
+  margin-top: 5px;
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
