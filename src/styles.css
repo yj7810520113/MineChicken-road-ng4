@@ -28,6 +28,7 @@
 }
 /* Rules for sizing the icon. */
 .material-icons.md-18 { font-size: 18px; }
+.material-icons.md-20 { font-size: 20px; }
 .material-icons.md-24 { font-size: 24px; }
 .material-icons.md-30 { font-size: 30px; }
 .material-icons.md-36 { font-size: 36px; }
@@ -132,6 +133,7 @@ body{
   stroke-dasharray: 6 4;
   stroke:rgba(233, 30, 99, 1);
   stroke-width: 1px;
+  z-index:1000;
 }
 .currentTimeLineLabel{
   fill:rgba(233, 30, 99, 1);
@@ -178,9 +180,14 @@ g.brush>.handle {
 
 
 /*预测出行的path的css*/
+/*.link_id_1{*/
+  /*stroke-width: 2px;*/
+  /*stroke:#ab47bc;*/
+  /*fill:transparent;*/
+/*}*/
 .link_id_1{
   stroke-width: 2px;
-  stroke:#ab47bc;
+  stroke:#039be5;
   fill:transparent;
 }
 .link_id_2{
@@ -190,22 +197,22 @@ g.brush>.handle {
 }
 .link_id_3{
   stroke-width: 2px;
-  stroke:#26a69a;
+  stroke:#039be5;
   fill:transparent;
 }
 .link_id_4{
   stroke-width: 2px;
-  stroke:#2baf2b;
+  stroke:#9575cd;
   fill:transparent;
 }
 .link_id_5{
   stroke-width: 2px;
-  stroke:#d4e157;
+  stroke:#039be5;
   fill:transparent;
 }
 .link_id_6{
   stroke-width: 2px;
-  stroke:#ffa726;
+  stroke:#9575cd;
   fill:transparent;
 }
 /*link_id_123456在鼠标移动时候的class*/

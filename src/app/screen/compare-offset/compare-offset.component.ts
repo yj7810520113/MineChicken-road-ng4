@@ -8,6 +8,8 @@ import 'rxjs/add/operator/filter';
 import {SharedVariableService} from "../../service/shared-variable.service";
 import {Subscription} from "rxjs/Subscription";
 import {Http} from "@angular/http";
+import {MdDialog} from "@angular/material";
+import {CompareOffsetDialogComponent} from "../dialog/compare-offset-dialog/compare-offset-dialog.component";
 
 @Component({
   selector: 'app-compare-offset',
@@ -21,7 +23,11 @@ export class CompareOffsetComponent implements OnInit {
 
 
   private currentTimeLine;
+  //需要展示的日期
   public selectedDate=[];
+  //是否锁住，如果被锁住则不刷新图形，如果没有被锁住则随着时间的更新刷新图形
+  //其中lock_outline为锁住，lock_open为打开
+  lock='lock_open';
   private selectedDate1=['2016-03-01','2016-03-02','2016-03-03','2016-03-04','2016-03-05','2016-03-06','2016-03-07'];
   private selectedDate2=['2016-04-01','2016-04-02','2016-04-03','2016-04-04','2016-04-05','2016-04-06','2016-04-07','2016-04-08','2016-04-09'];
 
@@ -29,7 +35,7 @@ export class CompareOffsetComponent implements OnInit {
   //2016年3月1号
   private startSpanTime=1456761600000;
   //2016年5月31号
-  private endSpanTime=1464624000000;
+  private endSpanTime=1464710400000;
   //当前播放/选择的时间
   public selectNowTime='2016-03-01';
   private compareCount=7;
@@ -101,20 +107,19 @@ export class CompareOffsetComponent implements OnInit {
     .range([this.areaHeight, 0]);
   private areaYScales = [this.areaNormalYScale, this.areaClearYScale, this.areaBusyYScale, this.areaVeryBusyYScale];
 
-  constructor(private http:Http,private fileReader: FileReaderService,private sharedVariable:SharedVariableService) {
+  constructor(private http:Http,private fileReader: FileReaderService,private sharedVariable:SharedVariableService,public dialog: MdDialog) {
   }
 
   ngOnInit() {
 
-    this.busy=this.http.get('http://www.mmcode.top:8080/airzj/ajax/tianchi/aqibyday')
-      .subscribe(x=>{})
+
 
 
     let svg=d3.select(this.svgElement.nativeElement);
     this.defs= svg.append('defs');
 
     //获取数据
-    this.fileReader.readFileToJson('/assets/file/areaData_2min.csv')
+    this.fileReader.readCDNCSVFileToJson('/assets/file/areaData_2min')
       .map((d) => {
         return this.parseAreaDatas(d)
       })
@@ -124,52 +129,58 @@ export class CompareOffsetComponent implements OnInit {
     //订阅时间
       this.sharedVariable.getTimeNow().subscribe((x)=>{
 
-      //设置在当前时间
-      this.selectNowTime=this.dateFormat(x);
+        //如果时间没有被锁住
+        if(this.lock=='lock_open'&&this.data) {
+          //设置在当前时间
+          this.selectNowTime = this.dateFormat(x);
 
-      let nowDate=this.dateFormat(x);
-      // console.log(nowDate);
-      // console.log(this.data);
-      let nowDatas=[];
-      //时间相同什么事都不干
-      if(nowDate==this.previousDate){
-      }
-      //否则过滤数据重新绘图
-      else{
-        this.selectedDate=this.setSelectedDate(x);
-        this.previousDate=nowDate;
-        for(let i=0;i<this.selectedDate.length;i++) {
-          let nowData = this.data.filter((d) => {
-            if(d.daydatetime.indexOf(this.selectedDate[i])==-1){
-              return false;
+          let nowDate = this.dateFormat(x);
+          // console.log(nowDate);
+          // console.log(this.data);
+          let nowDatas = [];
+          //时间相同什么事都不干
+          if (nowDate == this.previousDate) {
+          }
+          //否则过滤数据重新绘图
+          else {
+            this.selectedDate = this.setSelectedDate(x);
+            this.previousDate = nowDate;
+            for (let i = 0; i < this.selectedDate.length; i++) {
+              let nowData = this.data.filter((d) => {
+                if (d.daydatetime.indexOf(this.selectedDate[i]) == -1) {
+                  return false;
+                }
+                else {
+                  return true;
+                }
+              });
+              nowDatas.push(nowData);
             }
-            else{
-              return true;
-            }
-          });
-          nowDatas.push(nowData);
+
+            //  利用得到的nowData重新绘图
+            nowDatas.sort((a, b) => {
+              return this.textLabelParse(a[0].daydatetime) - this.textLabelParse(b[0].daydatetime);
+            })
+            this.renderPlot(nowDatas);
+
+
+          }
+        }
+        else {
+        //如果选择的时间被锁住，则啥都不干
         }
 
-      //  利用得到的nowData重新绘图
-        nowDatas.sort((a,b)=>{
-          return this.textLabelParse(a[0].daydatetime)-this.textLabelParse(b[0].daydatetime);
-        })
-        this.renderPlot(nowDatas);
-
-
-
-
-
-      }
-
        // 更新currentTimeLine
-      this.currentTimeLine
-        .attr('x1',this.timeXScale(this.parseDate(this.timeFormat(new Date(x))))+this.marginLeft)
-        .attr('x2',this.timeXScale(this.parseDate(this.timeFormat(new Date(x))))+this.marginLeft)
-        .attr('y2',svg.style('height'));
+        if(this.currentTimeLine) {
+          this.currentTimeLine
+            .attr('x1', this.timeXScale(this.parseDate(this.timeFormat(new Date(x)))) + this.marginLeft)
+            .attr('x2', this.timeXScale(this.parseDate(this.timeFormat(new Date(x)))) + this.marginLeft)
+            .attr('y2', svg.style('height'));
+        }
 
 
     })
+
 
 
 
@@ -426,5 +437,50 @@ export class CompareOffsetComponent implements OnInit {
     })
     this.renderPlot(nowDatas);
 
+  }
+
+  openDialog(): void {
+    let dialogRef = this.dialog.open(CompareOffsetDialogComponent, {
+      width: '300px',
+      // data: { duration:this.duration,speed:this.speed }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      // console.log('The dialog was closed');
+      // console.log(result)
+      if(!result){
+        return;
+      }
+      this.selectedDate=result;
+      let nowDatas=[];
+      for (let i = 0; i < this.selectedDate.length; i++) {
+        let nowData = this.data.filter((d) => {
+          if (d.daydatetime.indexOf(this.selectedDate[i]) == -1) {
+            return false;
+          }
+          else {
+            return true;
+          }
+        });
+        nowDatas.push(nowData);
+      }
+
+      //  利用得到的nowData重新绘图
+      nowDatas.sort((a, b) => {
+        return this.textLabelParse(a[0].daydatetime) - this.textLabelParse(b[0].daydatetime);
+      })
+      this.renderPlot(nowDatas);
+
+    });
+
+  }
+
+  lockSelectDate(){
+    if(this.lock=='lock_outline'){
+      this.lock='lock_open';
+    }
+    else{
+      this.lock='lock_outline';
+    }
   }
 }

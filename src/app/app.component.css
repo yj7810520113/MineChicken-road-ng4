@@ -1,3 +1,18 @@
+/*title*/
+.screenTitle{
+  position: absolute;
+  top:25px;
+  left: 960px;
+  width: 980px;
+  margin-left: -490px;
+  /*margin-left:-810px;*/
+
+  color:#07bbc3;
+  text-align: center;
+  line-height: 40px;
+  font-size: 28px;
+}
+
 /**************当前时间*******************/
 .dayTimeArea{
   position: absolute;
@@ -14,7 +29,7 @@
   width: 400px;
   line-height: 30px;
   text-align: center;
-  font-size:25px;
+  font-size:20px;
   border-bottom: 1px #07bbc3 solid;
 }
 
@@ -48,36 +63,111 @@
   height:455px;
   width:450px;
   margin-top: 50px;
-  overflow-y:auto;
-  overflow-x:hidden;
+
 }
 
-
+/*****************map********************/
 .map{
   position: absolute;
   top:125px;
-  left:525px;
-  width: 850px;
-  height: 600px;
+  left:530px;
+  width: 860px;
+  height: 555px;
+}
+/*map中嵌入legend*/
+.map .screenLegend{
+  position: absolute;
+  width: 170px;
+  /*margin: 25px 25px;*/
+  top:0px;
+  left:0px;
+
+}
+.map .screenLegend .legendTitle{
+  float: left;
+  width: 100%;
+  height: 25px;
+  line-height: 25px;
+  font-size: 16px;
+  text-align: center;
+  color:rgb(7,170,195);
+  background-color: rgba(7,170,195,0.2);
+}
+.map .screenLegend .legendArea{
+  float: left;
+  height: 250px;
+  width: 100%;
+  color:rgb(7,170,195);
+}
+.map .screenLegend .legendArea .legendEle{
+  float: left;
+  height: 35px;
+  line-height: 25px;
+  width: 100%;
+  margin-left: 10px;
+}
+.map .screenLegend .legendArea .legendEle .legendPlot{
+  float: left;
+  width: 40px;
+  height: 25px;
+  margin-top: 5px;
+}
+.map .screenLegend .legendArea .legendEle .legendText{
+  float: left;
+  width: 100px;
+  height: 35px;
+  margin-left: 15px;
+  color:rgb(7,170,195);
+  line-height: 35px;
+  font-size: 15px;
 }
 /*******************时间线*****************************/
 .timeLineContainer{
   position:absolute;
-  top:730px;
+  top:705px;
   left:530px;
-  height: 300px;
+  height: 325px;
   width:860px;
 }
+.timeLineContainer .textArea{
+  float: left;
+  width: 100%;
+  height: 25px;
+  line-height: 25px;
+  font-size: 16px;
+  text-align: center;
+  color:rgb(7,170,195);
+  background-color: rgba(7,170,195,0.2);
+}
+.timeLineContainer .textArea .control{
+  position: absolute;
+  top:0px;
+  right:5px;
+  height: 25px;
+  width:25px;
+  line-height: 25px;
+  text-align: right;
+  cursor: pointer;
+}
+.timeLineContainer .control .mat-select{
+  padding-top: 0px;
+}
+.timeLineContainer .control .mat-select-trigger{
+  height: 18px;
+}
 .detailTimeSeries{
+  float: left;
   width:100%;
   height:150px;
 }
 .overViewTimeSeries{
+  float: left;
   width:100%;
   height:100px;
 }
 .controlPannel{
   margin: auto auto;
+  float: left;
   width:820px;
   height:50px;
   padding-left: 25px;

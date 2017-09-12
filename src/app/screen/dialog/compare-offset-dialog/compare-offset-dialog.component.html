@@ -1,0 +1,21 @@
+<h1 md-dialog-title>选择需要对比的时间</h1>
+<div md-dialog-content>
+  <!--<p>What's your favorite animal?</p>-->
+  <md-form-field>
+  <input mdInput [mdDatepicker]="picker"  [min]="startSpanTime" [max]="endSpanTime" [value]="timeValue" placeholder="选择日期" (dateInput)="changeDate($event)">
+  <md-datepicker-toggle mdSuffix [for]="picker"></md-datepicker-toggle>
+  <md-datepicker #picker ></md-datepicker>
+  </md-form-field>
+<p>已选择的日期</p>
+  <md-chip-list>
+  <md-chip style="background-color: rgb(7,170,195);margin-left: 0px;" *ngFor="let date of selectedDates">
+  {{date}}
+  <md-icon  mdChipRemove (click)="removeChips(date)">cancel</md-icon>
+  </md-chip>
+  </md-chip-list>
+
+</div>
+<div md-dialog-actions>
+  <button md-button [md-dialog-close]="selectedDates" tabindex="2">确定</button>
+  <button md-button (click)="onNoClick()" tabindex="-1">取消</button>
+</div>

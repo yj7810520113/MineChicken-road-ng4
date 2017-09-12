@@ -186,7 +186,7 @@ export class OverviewTimeSeriesComponent implements OnInit {
       })
 
 
-    this.fileReader.readFileToJson('/assets/file/data_offset_day.csv')
+    this.fileReader.readCDNCSVFileToJson('/assets/file/data_offset_day')
     // this.fileReader.readFileToJson('/assets/file/data_offset3.3.csv')
       .map((d) => {
         return this.parseAreaDatas(d)

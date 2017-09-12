@@ -1,0 +1,21 @@
+<h1 md-dialog-title>设置播放速度和时间间隔</h1>
+<div md-dialog-content>
+  <!--<p>What's your favorite animal?</p>-->
+  <!--<md-form-field>-->
+    <!--<md-select placeholder="播放间隔" [(ngModel)]="durationSelectedValue">-->
+      <!--<md-option *ngFor="let dataEle of data.duration" [value]="dataEle.key">-->
+        <!--{{ dataEle.value }}-->
+      <!--</md-option>-->
+    <!--</md-select>-->
+
+    <md-select placeholder="播放速度" [(ngModel)]="speedSelectdValue">
+      <md-option *ngFor="let dataEle of data.speed" [value]="dataEle.key">
+        {{ dataEle.value }}
+      </md-option>
+    </md-select>
+  <!--</md-form-field>-->
+</div>
+<div md-dialog-actions>
+  <button md-button [md-dialog-close]="{speed:speedSelectdValue}" tabindex="2">确定</button>
+  <button md-button (click)="onNoClick()" tabindex="-1">取消</button>
+</div>

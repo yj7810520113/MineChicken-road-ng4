@@ -28,7 +28,7 @@ export class CountLinkPieComponent implements OnInit {
   private mainRadius=200/2;
   private mainArc = d3.arc()
     .innerRadius(this.mainRadius - 20)
-    .outerRadius(this.mainRadius - 70);
+    .outerRadius(this.mainRadius - 60);
   private areaRadius=100/2;
   private areaArc=d3.arc()
     .innerRadius(this.areaRadius-10)

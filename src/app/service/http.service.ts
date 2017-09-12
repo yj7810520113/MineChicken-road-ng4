@@ -11,5 +11,11 @@ export class HttpService {
     return this.http.get(this.netConfig.SERVICE_BASE_URL+url)
       .map(x=>x.json());
   }
+  getRoadDayData(url:string){
+    console.log(this.netConfig.SERVICE_BASE_URL+url);
+    return this.http.get(this.netConfig.SERVICE_BASE_URL+url)
+      .map(x=>{
+        return x.json()});
+  }
 
 }

@@ -2,7 +2,7 @@ import {Component, ElementRef, Inject, OnInit, ViewChild} from '@angular/core';
 import {ROAD_CONFIG} from "../../config/road-config";
 import {ROAD_PATH_CONFIG} from "../../config/road-path-config";
 import {HttpService} from "../../service/http.service";
-import {log} from "util";
+import {isUndefined, log} from "util";
 import {LinkPathData} from "../DataTransModel";
 import {SharedVariableService} from "../../service/shared-variable.service";
 import {FileReaderService} from "../../service/file-reader.service";
@@ -187,17 +187,14 @@ export class SimulateTravelComponent implements OnInit {
         }
         //如果时间相等
         else{
-        //   console.log(z)
-        // console.log(this.currentTimeLine)
-        //   console.log(this.yScale.domain())
-        //   console.log(this.yScale.invert(new Date(z)))
-          this.currentTimeLine.attr('y1',this.yScale(new Date(z)))
-            .attr('y2',this.yScale(new Date(z)));
+          if(!isUndefined(this.currentTimeLine)) {
+            this.currentTimeLine.attr('y1', this.yScale(new Date(z)))
+              .attr('y2', this.yScale(new Date(z)));
 
-
-          //  移动=scroll
-          this.scrollDistance=this.yScale(new Date(z))-400;
-          this.divScroll.nativeElement.scrollTop=this.scrollDistance;
+            //  移动=scroll
+            this.scrollDistance = this.yScale(new Date(z)) - 400;
+            this.divScroll.nativeElement.scrollTop = this.scrollDistance;
+          }
         }
 
 
@@ -411,6 +408,7 @@ export class SimulateTravelComponent implements OnInit {
         //当鼠标移动到path上面的时候，path是可以点击的状态
         let mouseY=d3.mouse(this.svg.select('path').node())[1];
         let timeNow1=this.yScale.invert(mouseY);
+        this.sharedVariable.setPauser(true);
         this.sharedVariable.setTimeNow(Math.round(timeNow1/(1000*60*2))*1000*60*2);
       });
 ;

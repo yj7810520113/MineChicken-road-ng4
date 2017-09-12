@@ -3,9 +3,10 @@ import {Subject} from "rxjs/Subject";
 import {Http} from "@angular/http";
 import {FileReaderService} from "./file-reader.service";
 import {LinkPathData} from "../screen/DataTransModel";
+import {Observable} from 'rxjs/Rx';
 import "rxjs/add/operator/debounceTime";
 import "rxjs/add/operator/distinctUntilChanged";
-import {Observable} from "rxjs/Observable";
+// import {Observable} from "rxjs/Observable";
 import "rxjs/add/observable/timer";
 import "rxjs/add/operator/share";
 import "rxjs/add/operator/switchMap";
@@ -23,9 +24,11 @@ export class SharedVariableService {
   //2016年3月1号
   private startSpanTime=1456761600000;
   //2016年5月31号
-  private endSpanTime=1464624000000;
+  private endSpanTime=1464710400000;
   //测试的duration为500
   private duration=500;
+  //播放的速度
+  private speed=2;
   //当前时间
   private timeNowSubject = new Subject();
   private everyHourSpeedOffset=new Subject();
@@ -35,8 +38,12 @@ export class SharedVariableService {
   private linkSpeedOffsetSubject=new Subject();
   //饼图像map和模拟出行传递的路径信息
   private pathSubject=new Subject();
+  //加载的时候暂停时间轴播放
+  private loadingPauseSubject=new Subject();
+  private loadingCount=0;
 
   constructor(private http:Http,private fileReader:FileReaderService) {
+    // this.setDuration(this.duration);
     this.timerObserver=Observable.timer(2000,this.duration);
 
     // https://github.com/ReactiveX/rxjs/issues/1542
@@ -44,9 +51,18 @@ export class SharedVariableService {
 
     this.pausable.subscribe(x=>{
       this.setTimeNow(this.startTime);
-      this.startTime+=1000*60*60*1;
+      this.startTime+=1000*60*this.speed;
+    });
+    this.pauser.next(false);
+
+    this.loadingPauseSubject.subscribe(x=>{
+      if(x==0){
+        this.pauser.next(false);
+      }
+      else{
+        this.pauser.next(true);
+      }
     })
-    this.pauser.next(true);
 
   }
 
@@ -62,6 +78,9 @@ export class SharedVariableService {
 
   setPauser(isPaused:boolean):any{
     this.pauser.next(isPaused);
+  }
+  getPauser():any{
+    return this.pauser;
   }
   setEveryHourSpeedOffset():any{
     // this.everyHourSpeedOffset.next(this.fileReader.readFileToJson('/assets/file/gy_contest_link_info.csv'));
@@ -91,6 +110,34 @@ export class SharedVariableService {
   }
   setPathSubject(path:any){
     return this.pathSubject.next(path);
+  }
+
+  // getLoadingPauseSubject():any{
+  //   return this.getLoadingPauseSubject;
+  // }
+  setLoadingPauseSubject(loading:number){
+    this.loadingCount+=loading;
+    console.log(this.loadingCount)
+    this.loadingPauseSubject.next(this.loadingCount);
+
+  }
+
+  setDuration(duration:number){
+    this.duration=duration;
+    // console.log(this.duration)
+    this.timerObserver=Observable.combineLatest(this.timerObserver,Observable.timer(2000,this.duration),(x1,x2)=>x2);
+    this.pauser.next(true);
+    this.pausable = this.pauser.switchMap(paused => paused ? Observable.never() : this.timerObserver);
+    //
+    this.pausable.subscribe(x=>{
+      this.setTimeNow(this.startTime);
+      this.startTime+=1000*60*this.speed;
+    });
+    this.pauser.next(true);
+    this.pauser.next(false);
+  }
+  setSpeed(speed:number){
+    this.speed=speed;
   }
 
 }

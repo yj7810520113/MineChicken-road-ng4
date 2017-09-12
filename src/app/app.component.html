@@ -1,6 +1,8 @@
+<div class="screenTitle">交通数据联动分析及可视化</div>
+
 <div class="dayTimeArea">
   <div class="dayTime">
-    <div id="dayTime">111</div>
+    <div id="dayTime"></div>
   </div>
 </div>
 
@@ -27,10 +29,83 @@
   </div>
 </div>
 <div class="map">
+  <div class="screenLegend plotArea">
+    <div class="legendTitle">图例</div>
+    <div class="legendArea">
+      <div class="legendEle">
+        <div class="legendPlot">
+          <svg height="25px" width="40px">
+            <rect width="40" height="25" fill="#2a9d8f"></rect>
+          </svg>
+        </div>
+        <div class="legendText">道路畅通</div>
+      </div>
+
+      <div class="legendEle">
+        <div class="legendPlot">
+          <svg height="25px" width="40px">
+            <rect width="40" height="25" fill="#e9c46a"></rect>
+          </svg>
+        </div>
+        <div class="legendText">道路缓行</div>
+      </div>
+
+      <div class="legendEle">
+        <div class="legendPlot">
+          <svg height="25px" width="40px">
+            <rect width="40" height="25" fill="#f4a261"></rect>
+          </svg>
+        </div>
+        <div class="legendText">道路中度拥堵</div>
+      </div>
+
+      <div class="legendEle">
+        <div class="legendPlot">
+          <svg height="25px" width="40px">
+            <rect width="40" height="25" fill="#e76f51"></rect>
+          </svg>
+        </div>
+        <div class="legendText">道路拥堵</div>
+      </div>
+
+      <div class="legendEle">
+        <div class="legendPlot">
+          <svg height="25px" width="40px">
+            <line x1="0px" y1="12.5px" y2="12.5px" x2="40px" class="currentTimeLine"></line>
+          </svg>
+        </div>
+        <div class="legendText">当前时刻</div>
+      </div>
+
+      <div class="legendEle">
+        <div class="legendPlot">
+          <svg height="25px" width="40px">
+            <line x1="0px" y1="12.5px" y2="12.5px" x2="40px" stroke-width="2px" stroke="#039be5"></line>
+          </svg>
+        </div>
+        <div class="legendText">道路正向</div>
+      </div>
+
+      <div class="legendEle">
+        <div class="legendPlot">
+          <svg height="25px" width="40px">
+            <line x1="0px" y1="12.5px" y2="12.5px" x2="40px" stroke-width="2px" stroke="#9575cd"></line>
+          </svg>
+        </div>
+        <div class="legendText">道路逆向</div>
+      </div>
+
+    </div>
+  </div>
   <app-map></app-map>
 </div>
 
 <div class="timeLineContainer  plotArea">
+  <div class="textArea">控制面板
+    <div class="control" (click)="openDialog()">
+      <i class="material-icons md-20 md-theme-color">settings</i>
+    </div>
+  </div>
 <div class="detailTimeSeries">
   <app-detail-time-series></app-detail-time-series>
 </div>

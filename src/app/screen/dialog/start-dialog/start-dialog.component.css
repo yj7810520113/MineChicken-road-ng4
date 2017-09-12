@@ -1,0 +1,14 @@
+.dialog{
+  width:400px;
+  height:150px;
+}
+.dialog .attention{
+  font-size: 22px;
+  font-weight: 600;
+  color:#3949ab;
+}
+.dialog .warning{
+  font-size: 22px;
+  font-weight: 900;
+  color:#e91e63;
+}

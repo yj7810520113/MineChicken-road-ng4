@@ -77,7 +77,7 @@ export class DetailTimeSeriesComponent implements OnInit {
 
     this.xAxis = d3.axisBottom()
       .scale(this.x)
-      .tickFormat(d3.timeFormat('%H:%M'))
+      .tickFormat(d3.timeFormat('%H时'))
       .ticks(d3.timeHour.every(1));
 
     this.yAxis = d3.axisLeft()
@@ -128,7 +128,7 @@ export class DetailTimeSeriesComponent implements OnInit {
     //绘制渐变色
 
 
-    this.busy=this.fileReader.readFileToJson('/assets/file/areaData_2min.csv')
+    this.busy=this.fileReader.readCDNCSVFileToJson('/assets/file/areaData_2min')
     // this.fileReader.readFileToJson('/assets/file/data_offset3.3.csv')
       .map((d) => {
         return this.parseAreaDatas(d)

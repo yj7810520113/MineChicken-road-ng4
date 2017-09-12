@@ -20,10 +20,20 @@ import { CountLinkPieComponent } from './screen/count-link-pie/count-link-pie.co
 import { ControlPannelComponent } from './screen/control-pannel/control-pannel.component'; // <-- import statement
 // import 'rx-from-csv';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {MdChipsModule, MdDatepickerModule, MdIconModule, MdNativeDateModule} from "@angular/material";
+import {
+  MdAutocompleteModule,
+  MdButtonModule, MdChipsModule, MdDatepickerModule, MdDialogModule, MdIconModule, MdInputModule, MdNativeDateModule,
+  MdSelectModule
+} from "@angular/material";
 import {BusyConfig, BusyModule} from "angular2-busy";
 import {InfiniteScrollModule} from "ngx-infinite-scroll";
 import {Ng2PageScrollModule} from "ng2-page-scroll";
+import { TimeLineDialogComponent } from './screen/dialog/time-line-dialog/time-line-dialog.component';
+import {FormsModule} from "@angular/forms";
+import { CompareOffsetDialogComponent } from './screen/dialog/compare-offset-dialog/compare-offset-dialog.component';
+import {NgbModule} from "@ng-bootstrap/ng-bootstrap";
+import { StartDialogComponent } from './screen/dialog/start-dialog/start-dialog.component';
+import {BusyConfigFactory} from "./config/busy-config-factory";
 
 
 @NgModule({
@@ -35,30 +45,46 @@ import {Ng2PageScrollModule} from "ng2-page-scroll";
     SimulateTravelComponent,
     OverviewTimeSeriesComponent,
     CountLinkPieComponent,
-    ControlPannelComponent
+    ControlPannelComponent,
+    TimeLineDialogComponent,
+    CompareOffsetDialogComponent,
+    StartDialogComponent,
   ],
   imports: [
     HttpModule,
     BrowserModule,
     BrowserAnimationsModule,
+    FormsModule,
     MdChipsModule,
     MdIconModule,
     MdDatepickerModule,
     MdNativeDateModule,
+    MdSelectModule,
+    MdButtonModule,
+    MdDialogModule,
+    MdInputModule,
+    MdAutocompleteModule,
     BusyModule,
-    BusyModule.forRoot(
-      new BusyConfig({
-        // message: 'Don\'t panic!',
-        // backdrop: false,
-        // template: '<div>{{message}}</div>',
-        // delay: 200,
-        // minDuration: 200000,
-        // wrapperClass: 'my-class'
-      })
-    ),
+    // BusyModule,
+    // BusyModule.forRoot(
+    //   new BusyConfig({
+    //     message: '',
+    //     // backdrop: false,
+    //     template:'<div class="ng-busy-default-wrapper">' +
+    //     '<div class="svgSpinner">' +
+    //     '<svg class="spinner" width="65px" height="65px" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">\n' +
+    //     '<circle class="loadingPath" fill="none" stroke-width="6" stroke-linecap="round" cx="33" cy="33" r="30"></circle>\n' +
+    //     '</svg>' +
+    //     '<div class="ng-busy-default-text"></div></div>',        // delay: 200,
+    //     // minDuration: 200000,
+    //     // wrapperClass: 'my-class'
+    //   })
+    // ),
     Ng2PageScrollModule,
+    NgbModule.forRoot(),
   ],
-  providers: [D3Service, FileReaderService,SharedVariableService,HttpService,
+  providers: [D3Service, SharedVariableService,FileReaderService,HttpService,
+    {provide: BusyConfig, useFactory: BusyConfigFactory},
     {
       provide: NET_CONFIG,
       useValue: NetConfig,
@@ -71,6 +97,7 @@ import {Ng2PageScrollModule} from "ng2-page-scroll";
       provide:ROAD_CONFIG,
       useValue:RoadConfig,
     }],
+  entryComponents:[TimeLineDialogComponent,CompareOffsetDialogComponent,StartDialogComponent],
   bootstrap: [AppComponent]
 })
 export class AppModule {

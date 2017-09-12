@@ -6,13 +6,16 @@ import {NET_CONFIG} from "../config/net-config";
 import {INetConfig} from "../config/Inet-config";
 import {ROAD_PATH_CONFIG} from "../config/road-path-config";
 import {IRoadPathConfig} from "../config/Iroad-path-config";
+import {SharedVariableService} from "./shared-variable.service";
 // import  'rx-from-csv';
 // import {Observable} from "rxjs/Observable";
 
 @Injectable()
 export class FileReaderService {
+  private shared;
   //
   constructor(private http: Http, @Inject(NET_CONFIG) private net_config: INetConfig,@Inject(ROAD_PATH_CONFIG) private road_path_config:IRoadPathConfig) {
+    // this.shared=this.sharedVariabel;
   }
 
   //

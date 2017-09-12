@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, HostListener, OnInit} from '@angular/core';
 import {SharedVariableService} from "../../service/shared-variable.service";
 import {share} from "rxjs/operator/share";
 
@@ -27,7 +27,7 @@ export class ControlPannelComponent implements OnInit {
   //2016年3月1号
   private startSpanTime=1456761600000;
   //2016年5月31号
-  private endSpanTime=1464624000000;
+  private endSpanTime=1464710400000;
   //当前时间
   private currentTime=1456761600000;
 
@@ -113,6 +113,19 @@ export class ControlPannelComponent implements OnInit {
         else{
           this.controlItems[10].isValid=false;
         }
+      });
+
+    this.sharedVariable.getPauser()
+      .subscribe(x=>{
+        console.log(x)
+        if(x==true) {
+          this.controlItems[5].iconName = 'play_arrow';
+          this.controlItems[5].value = this.labelStart;
+        }
+        else{
+          this.controlItems[5].iconName = 'pause';
+          this.controlItems[5].value = '暂停';
+        }
       })
   }
   clickEvent(event:any){
@@ -166,6 +179,37 @@ export class ControlPannelComponent implements OnInit {
     }
     else if(event.key=='after7day'){
       this.sharedVariable.setTimeNow(this.currentTime+1000*60*60*24*7);
+    }
+  }
+  @HostListener('window:keydown', ['$event'])
+  keyboardInput(event: KeyboardEvent) {
+    // console.log(event)
+    //空格暂停
+    // if(x==true) {
+    //   this.controlItems[5].iconName = 'play_arrow';
+    //   this.controlItems[5].value = this.labelStart;
+    // }
+    // else{
+    //   this.controlItems[5].iconName = 'pause';
+    //   this.controlItems[5].value = '暂停';
+    // }
+    if(event.keyCode==32||event.keyCode==80){
+      if(this.controlItems[5].iconName=='play_arrow'){
+        this.controlItems[5].iconName = 'pause';
+          this.controlItems[5].value = '暂停';
+          this.sharedVariable.setPauser(false);
+      }
+      else {
+          this.controlItems[5].iconName = 'play_arrow';
+          this.controlItems[5].value = this.labelStart;
+          this.sharedVariable.setPauser(true);
+      }
+    }
+    if(event.keyCode==188||event.keyCode==37){
+      this.sharedVariable.setTimeNow(this.currentTime-1000*60*2);
+    }
+    if(event.keyCode==190||event.keyCode==39){
+      this.sharedVariable.setTimeNow(this.currentTime+1000*60*2);
     }
   }
 
